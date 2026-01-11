@@ -13,7 +13,7 @@ The simulator enables teams to test and optimize gameplay strategies before buil
 - Support for multiple robot roles including collectors and scorers.
 
 ## Demo
-<img src="./public/demo.gif" alt="2026-Rebuilt-RobotSim Demo" width="50%">
+<img src="./public/demo.gif" alt="2026-Rebuilt-RobotSim Demo">
 
 ## Contributing
 We welcome contributions from the community. If you have improvements for the simulation engine, new robot strategies, or UI enhancements, please feel free to submit a pull request.
