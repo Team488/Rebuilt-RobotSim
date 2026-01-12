@@ -1,6 +1,11 @@
 import { Field } from "./Field";
 import type { Team } from "./GameConst";
 
+export type Action =
+  | { type: "SHOOT"; distance: number; angle: number }
+  | { type: "COLLECT" }
+  | { type: "DROP" };
+
 export interface RobotStrategy {
   moveSpeed: number; // Meters per second
   actionTime: number; // Seconds
@@ -9,10 +14,16 @@ export interface RobotStrategy {
   decideAction(robot: Robot, field: Field): Action | null;
 }
 
-export type Action =
-  | { type: "SHOOT"; distance: number; angle: number }
-  | { type: "COLLECT" }
-  | { type: "DROP" };
+export abstract class BaseStrategy implements RobotStrategy {
+  abstract name: string;
+  abstract actionTime: number;
+
+  abstract decideMove(robot: Robot, field: Field): { x: number; y: number } | null;
+  abstract decideAction(robot: Robot, field: Field): Action | null;
+}
+
+export abstract class ActiveScoringStrategy extends BaseStrategy { }
+export abstract class InactiveScoringStrategy extends BaseStrategy { }
 
 export class Robot {
   id: string;

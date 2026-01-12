@@ -7,6 +7,8 @@ import {
   EV_OPPONENT_ZONE,
   DIST_EV_COST,
   FieldTile,
+  ZONE_RATIO_LEFT,
+  ZONE_RATIO_RIGHT,
 } from "./GameConst";
 import type { Team } from "./GameConst";
 // import { FieldTile } from './Field'; // Removed
@@ -24,10 +26,10 @@ export function getBallEV(
   let baseEV = 0;
 
   // Continuous EV Logic
-  // Control Points at center of each zone (1/6, 3/6, 5/6)
-  const cpLeftX = 1 / 6;
-  const cpMidX = 3 / 6;
-  const cpRightX = 5 / 6;
+  // Control Points at center of each zone
+  const cpLeftX = ZONE_RATIO_LEFT / 2;
+  const cpMidX = (ZONE_RATIO_LEFT + ZONE_RATIO_RIGHT) / 2;
+  const cpRightX = (ZONE_RATIO_RIGHT + 1) / 2;
 
   let evLeft, evMid, evRight;
 
@@ -48,6 +50,13 @@ export function getBallEV(
   // to the nearest control point if we are near the edge.
   // Actually, simple lerp between segments:
 
+  // Non-linear transition to keep EV flatter within zones and steeper at borders
+  const transition = (t: number) => {
+    return t < 0.5
+      ? 0.5 * Math.pow(2 * t, 4) // Power of 4 for stronger weighting
+      : 1 - 0.5 * Math.pow(2 * (1 - t), 4);
+  };
+
   if (ratio <= cpLeftX) {
     baseEV = evLeft;
   } else if (ratio >= cpRightX) {
@@ -55,11 +64,11 @@ export function getBallEV(
   } else if (ratio < cpMidX) {
     // Between Left and Mid
     const t = (ratio - cpLeftX) / (cpMidX - cpLeftX);
-    baseEV = evLeft + t * (evMid - evLeft);
+    baseEV = evLeft + transition(t) * (evMid - evLeft);
   } else {
     // Between Mid and Right
     const t = (ratio - cpMidX) / (cpRightX - cpMidX);
-    baseEV = evMid + t * (evRight - evMid);
+    baseEV = evMid + transition(t) * (evRight - evMid);
   }
 
   // Add proximity bonus gradient
@@ -329,8 +338,10 @@ export function calculateHeading(
 
 export function isInTeamZone(x: number, team: Team): boolean {
   if (team === TEAM_RED) {
-    return x < FIELD_WIDTH / 3;
+    // Red zone is strictly left of the red boundary wall
+    return x < Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT);
   } else {
-    return x >= (2 * FIELD_WIDTH) / 3;
+    // Blue zone is strictly right of the blue boundary wall
+    return x >= Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1;
   }
 }

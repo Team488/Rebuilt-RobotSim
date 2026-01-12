@@ -1,5 +1,5 @@
-import type { RobotStrategy, Action } from "../Robot";
-import { Robot } from "../Robot";
+import { Robot, InactiveScoringStrategy } from "../Robot";
+import type { Action } from "../Robot";
 import { Field } from "../Field";
 import { FieldTile } from "../GameConst";
 import {
@@ -9,8 +9,8 @@ import {
   getPathTarget,
 } from "../StrategyUtils";
 
-export class BasicCollectorStrategy implements RobotStrategy {
-  moveSpeed = 4.0; // m/s
+export class BasicCollectorStrategy extends InactiveScoringStrategy {
+  name = "Basic Collector";
   actionTime = 0.5; // Fast pickup
   isDelivering = false;
   lastDropLocation: { x: number; y: number } | null = null;

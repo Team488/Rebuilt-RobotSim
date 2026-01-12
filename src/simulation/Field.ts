@@ -5,6 +5,9 @@ import {
   TEAM_BLUE,
   INITIAL_FIELD_LAYOUT,
   FieldTile,
+  ZONE_RATIO_LEFT,
+  ZONE_RATIO_RIGHT,
+  BOUNDARY_WALL_HEIGHT_PERCENT,
 } from "./GameConst";
 import { ScoringLocation } from "./ScoringLocation";
 
@@ -86,11 +89,11 @@ export class Field {
     // 2. Add Team Boundary Borders (70% centered)
     // Red zone: x < width / 3
     // Blue zone: x >= 2 * width / 3
-    const leftBoundaryX = Math.floor(cols / 3 - 0.001); // Rightmost of Red
-    const rightBoundaryX = Math.ceil((2 * cols) / 3 - 0.001); // Leftmost of Blue
+    const leftBoundaryX = Math.floor(cols * ZONE_RATIO_LEFT);
+    const rightBoundaryX = Math.floor(cols * ZONE_RATIO_RIGHT);
 
     const innerHeight = rows - 2;
-    const blockedRows = Math.round(0.7 * innerHeight);
+    const blockedRows = Math.round(BOUNDARY_WALL_HEIGHT_PERCENT * innerHeight);
     const topSkip = Math.floor((innerHeight - blockedRows) / 2);
 
     for (let r = 1 + topSkip; r < 1 + topSkip + blockedRows; r++) {
@@ -105,8 +108,8 @@ export class Field {
 
   respawnBall() {
     // Collect all empty slots in the neutral zone
-    const leftBoundaryX = Math.floor(this.width / 3 - 0.001);
-    const rightBoundaryX = Math.ceil((2 * this.width) / 3 - 0.001);
+    const leftBoundaryX = Math.floor(this.width * ZONE_RATIO_LEFT);
+    const rightBoundaryX = Math.floor(this.width * ZONE_RATIO_RIGHT);
 
     const minX = leftBoundaryX + 1;
     const maxX = rightBoundaryX - 1;

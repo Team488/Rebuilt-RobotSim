@@ -1,7 +1,13 @@
-import type { RobotStrategy, Action } from "../Robot";
-import { Robot } from "../Robot";
+import { Robot, ActiveScoringStrategy } from "../Robot";
+import type { Action } from "../Robot";
 import { Field } from "../Field";
-import { FieldTile, EV_SCORED, FIELD_WIDTH } from "../GameConst";
+import {
+  FieldTile,
+  EV_SCORED,
+  FIELD_WIDTH,
+  ZONE_RATIO_LEFT,
+  ZONE_RATIO_RIGHT,
+} from "../GameConst";
 import {
   findBestEVBall,
   getScoringLocation,
@@ -9,8 +15,8 @@ import {
   isInTeamZone,
 } from "../StrategyUtils";
 
-export class BasicScoringStrategy implements RobotStrategy {
-  moveSpeed = 3.0; // m/s
+export class BasicScoringStrategy extends ActiveScoringStrategy {
+  name = "Basic Scoring";
   actionTime = 1.0;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
@@ -21,6 +27,15 @@ export class BasicScoringStrategy implements RobotStrategy {
 
       if (scoreLoc) {
         if (inZone) {
+          // If in zone and within shooting range, stop moving to avoid overshooting
+          const dx = scoreLoc.x + 0.5 - robot.x;
+          const dy = scoreLoc.y + 0.5 - robot.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist <= robot.maxShootDistance * 0.9) {
+            return null;
+          }
+
           // In zone: Go to Goal
           return getPathTarget(field, robot, {
             x: scoreLoc.x + 0.5,
@@ -31,8 +46,8 @@ export class BasicScoringStrategy implements RobotStrategy {
           // For Red: x < FIELD_WIDTH / 3. For Blue: x >= 2 * FIELD_WIDTH / 3.
           const safeZoneX =
             robot.team === "RED"
-              ? FIELD_WIDTH / 3 - 1
-              : (2 * FIELD_WIDTH) / 3 + 1;
+              ? Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT) - 0.5
+              : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1.5;
           return getPathTarget(field, robot, { x: safeZoneX, y: robot.y }); // Move towards zone boundary
         }
       }
