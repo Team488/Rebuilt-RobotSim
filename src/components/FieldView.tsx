@@ -154,18 +154,6 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
         }
       });
 
-      // Draw Time
-      ctx.fillStyle = "white";
-      ctx.font = "20px Arial";
-      ctx.textAlign = "left";
-      ctx.fillText(`Time: ${engine.time.toFixed(1)}s`, 10, 30);
-
-      // Draw Scores
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#ff4444";
-      ctx.fillText(`Red: ${engine.scoreRed}`, canvas.width - 10, 30);
-      ctx.fillStyle = "#4444ff";
-      ctx.fillText(`Blue: ${engine.scoreBlue}`, canvas.width - 10, 55);
     };
 
     render();
