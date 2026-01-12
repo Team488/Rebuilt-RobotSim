@@ -112,7 +112,7 @@ export class Robot {
     const isStuck = this.stuckTicks > 10;
 
     if (targetChanged || isStuck || !this.cachedPath || this.cachedPath.length === 0) {
-      const path = AStar.findPath(field, { x: this.x, y: this.y }, target);
+      const path = AStar.findPath(field, { x: this.x, y: this.y }, target, this.id);
       if (path && path.length > 1) {
         this.cachedPath = path.slice(1); // Skip current tile
       } else {
