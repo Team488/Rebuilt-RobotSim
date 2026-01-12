@@ -64,6 +64,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                             const StratClass = ALL_ACTIVE_STRATEGIES.find(S => new S().name === e.target.value);
                                             if (StratClass) {
                                                 robot.scoringStrategy = new StratClass();
+                                                engine.saveConfigs();
                                                 onUpdate();
                                             }
                                         }}
@@ -87,6 +88,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                             const StratClass = ALL_INACTIVE_STRATEGIES.find(S => new S().name === e.target.value);
                                             if (StratClass) {
                                                 robot.collectionStrategy = new StratClass();
+                                                engine.saveConfigs();
                                                 onUpdate();
                                             }
                                         }}
@@ -113,6 +115,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         value={robot.moveSpeed}
                                         onChange={(e) => {
                                             robot.moveSpeed = parseFloat(e.target.value) || 0;
+                                            engine.saveConfigs();
                                             onUpdate();
                                         }}
                                     />
@@ -127,6 +130,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         value={robot.maxBalls}
                                         onChange={(e) => {
                                             robot.maxBalls = parseInt(e.target.value) || 0;
+                                            engine.saveConfigs();
                                             onUpdate();
                                         }}
                                     />
@@ -145,6 +149,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         value={robot.baseShotCooldown}
                                         onChange={(e) => {
                                             robot.baseShotCooldown = parseInt(e.target.value) || 0;
+                                            engine.saveConfigs();
                                             onUpdate();
                                         }}
                                     />
@@ -160,6 +165,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         value={robot.maxShootDistance}
                                         onChange={(e) => {
                                             robot.maxShootDistance = parseFloat(e.target.value) || 0;
+                                            engine.saveConfigs();
                                             onUpdate();
                                         }}
                                     />

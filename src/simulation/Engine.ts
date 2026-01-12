@@ -1,5 +1,5 @@
 import { Field, StartingField } from "./Field";
-import { Robot } from "./Robot";
+import { Robot, type RobotStrategy } from "./Robot";
 import { BasicScoringStrategy } from "./strategies/BasicScoringStrategy";
 import { BasicCollectorStrategy } from "./strategies/BasicCollectorStrategy";
 import {
@@ -15,6 +15,19 @@ import {
 } from "./GameConst";
 import type { Team } from "./GameConst";
 import { isInTeamZone } from "./StrategyUtils";
+import { ALL_ACTIVE_STRATEGIES, ALL_INACTIVE_STRATEGIES } from "./strategies";
+
+const STORAGE_KEY = "robot_configs_v1";
+
+interface RobotConfig {
+  id: string;
+  scoringStrategy: string;
+  collectionStrategy: string;
+  moveSpeed: number;
+  maxBalls: number;
+  baseShotCooldown: number;
+  maxShootDistance: number;
+}
 
 export interface GameResult {
   winner: Team | "TIE";
@@ -41,41 +54,109 @@ export class Engine {
   constructor() {
     this.field = new StartingField();
     this.robots = [];
-    this.initializeGame();
+    this.initializeGame(false); // Initial load, don't preserve (but will load from cache)
   }
 
-  initializeGame() {
+  initializeGame(preserveConfigs: boolean = false) {
     this.field = new StartingField();
+    const oldRobots = [...this.robots];
     this.robots = [];
     this.time = 0;
     this.scoreRed = 0;
     this.scoreBlue = 0;
-    this.currentScoringTeam = TEAM_BLUE; // Blue starts? Or Configurable.
+    this.currentScoringTeam = TEAM_BLUE;
     this.modeTimer = 0;
 
     // Initialize Teams
-    this.initializeTeam(TEAM_RED);
-    this.initializeTeam(TEAM_BLUE);
+    this.initializeTeam(TEAM_RED, preserveConfigs ? oldRobots : undefined);
+    this.initializeTeam(TEAM_BLUE, preserveConfigs ? oldRobots : undefined);
 
     this.updateRobotModes();
   }
 
-  initializeTeam(team: Team) {
+  initializeTeam(team: Team, oldRobots?: Robot[]) {
+    const cachedConfigs = this.loadConfigs();
+
     for (let i = 0; i < ROBOTS_PER_TEAM; i++) {
       const startX = team === TEAM_RED ? 1 + i : FIELD_WIDTH - 2 - i;
       const startY = 1 + i * 2;
       const id = `${team === TEAM_RED ? "R" : "B"}${i + 1}`;
+
+      let scoringStrat: RobotStrategy = new BasicScoringStrategy();
+      let collectionStrat: RobotStrategy = new BasicCollectorStrategy();
+      let moveSpeed = 3.5;
+      let maxBalls = 3;
+      let baseShotCooldown = 5;
+      let maxShootDistance = 10;
+
+      // Priority 1: Preserve from current session if requested
+      const oldRobot = oldRobots?.find((r) => r.id === id);
+      if (oldRobot) {
+        scoringStrat = oldRobot.scoringStrategy;
+        collectionStrat = oldRobot.collectionStrategy;
+        moveSpeed = oldRobot.moveSpeed;
+        maxBalls = oldRobot.maxBalls;
+        baseShotCooldown = oldRobot.baseShotCooldown;
+        maxShootDistance = oldRobot.maxShootDistance;
+      } else {
+        // Priority 2: Load from cache
+        const config = cachedConfigs.find((c) => c.id === id);
+        if (config) {
+          const ActiveClass = ALL_ACTIVE_STRATEGIES.find((S) => new S().name === config.scoringStrategy);
+          if (ActiveClass) scoringStrat = new ActiveClass();
+
+          const InactiveClass = ALL_INACTIVE_STRATEGIES.find((S) => new S().name === config.collectionStrategy);
+          if (InactiveClass) collectionStrat = new InactiveClass();
+
+          moveSpeed = config.moveSpeed;
+          maxBalls = config.maxBalls;
+          baseShotCooldown = config.baseShotCooldown;
+          maxShootDistance = config.maxShootDistance;
+        }
+      }
 
       const robot = new Robot(
         id,
         startX,
         startY,
         team,
-        new BasicScoringStrategy(),
-        new BasicCollectorStrategy(),
+        scoringStrat,
+        collectionStrat
       );
+      robot.moveSpeed = moveSpeed;
+      robot.maxBalls = maxBalls;
+      robot.baseShotCooldown = baseShotCooldown;
+      robot.maxShootDistance = maxShootDistance;
+
       this.robots.push(robot);
     }
+  }
+
+  saveConfigs() {
+    try {
+      const configs: RobotConfig[] = this.robots.map((r) => ({
+        id: r.id,
+        scoringStrategy: r.scoringStrategy.name,
+        collectionStrategy: r.collectionStrategy.name,
+        moveSpeed: r.moveSpeed,
+        maxBalls: r.maxBalls,
+        baseShotCooldown: r.baseShotCooldown,
+        maxShootDistance: r.maxShootDistance,
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
+    } catch (e) {
+      console.error("Failed to save configs", e);
+    }
+  }
+
+  loadConfigs(): RobotConfig[] {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to load configs", e);
+    }
+    return [];
   }
 
   start() {
@@ -96,7 +177,7 @@ export class Engine {
 
   reset() {
     this.stop();
-    this.initializeGame();
+    this.initializeGame(true); // Preserve configs on reset
     if (this.onTick) this.onTick(this);
   }
 
