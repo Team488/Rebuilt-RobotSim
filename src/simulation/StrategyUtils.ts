@@ -158,33 +158,32 @@ export function findBestEVBall(
   let maxScore = -Infinity;
   let ballsOnField = 0;
 
-  for (let r = 0; r < field.grid.length; r++) {
-    for (let c = 0; c < field.grid[0].length; c++) {
-      if (field.grid[r][c] === FieldTile.BALL) {
-        if (filterFn && !filterFn(r, c)) continue;
+  field.ballPositions.forEach((pos) => {
+    const c = pos % field.width;
+    const r = Math.floor(pos / field.width);
 
-        ballsOnField++;
+    if (filterFn && !filterFn(r, c)) return;
 
-        const bx = c + 0.5;
-        const by = r + 0.5;
-        const ballPos = { x: bx, y: by };
-        const currentEV = getBallEV(bx, by, robot.team, field);
+    ballsOnField++;
 
-        const score = calculateSelectionScore(
-          robot,
-          ballPos,
-          targetPos,
-          currentEV,
-          targetEV,
-        );
+    const bx = c + 0.5;
+    const by = r + 0.5;
+    const ballPos = { x: bx, y: by };
+    const currentEV = getBallEV(bx, by, robot.team, field);
 
-        if (score > maxScore) {
-          maxScore = score;
-          bestBall = ballPos;
-        }
-      }
+    const score = calculateSelectionScore(
+      robot,
+      ballPos,
+      targetPos,
+      currentEV,
+      targetEV,
+    );
+
+    if (score > maxScore) {
+      maxScore = score;
+      bestBall = ballPos;
     }
-  }
+  });
 
   return { ball: bestBall, ballsOnField };
 }
@@ -199,60 +198,54 @@ export function getCollectionVector(
   let sumX = 0;
   let sumY = 0;
 
-  // Iterate over all balls
-  for (let r = 0; r < field.grid.length; r++) {
-    for (let c = 0; c < field.grid[0].length; c++) {
-      if (field.grid[r][c] === FieldTile.BALL) {
-        // Check if this is the excluded ball (approximate float match)
-        if (
-          excludeBall &&
-          Math.abs(c - excludeBall.x) < 0.1 &&
-          Math.abs(r - excludeBall.y) < 0.1
-        ) {
-          continue;
-        }
+  // Iterate over indexed ball positions
+  field.ballPositions.forEach((pos) => {
+    const c = pos % field.width;
+    const r = Math.floor(pos / field.width);
 
-        const ballX = c + 0.5;
-        const ballY = r + 0.5;
-
-        // 1. Calculate Potential Gain
-        // How much do we gain by moving this ball to staging?
-        const currentEV = getBallEV(ballX, ballY, robot.team, field);
-        const gain = stagingEV - currentEV;
-
-        // If gain is negative or negligible, ignore (ball is already good)
-        if (gain <= 0.01) continue;
-
-        // 2. Calculate Cost (Total Distance)
-        const dxToBall = ballX - robot.x;
-        const dyToBall = ballY - robot.y;
-        const distToBall = Math.sqrt(dxToBall * dxToBall + dyToBall * dyToBall);
-
-        const dxToStaging = stagingLoc.x - ballX;
-        const dyToStaging = stagingLoc.y - ballY;
-        const distToStaging = Math.sqrt(dxToStaging * dxToStaging + dyToStaging * dyToStaging);
-        const totalDist = distToBall + distToStaging;
-
-        if (totalDist < 0.001) continue;
-
-        // 3. Force Magnitude = Gain / Cost^2
-        // We square cost to make local options stronger, but Gain is the multiplier.
-        // Adjustable: Power of 1.5 or 2.
-        // Using 2.0 to strongly discourage infinite travel for marginal gains
-        const force = gain / Math.pow(totalDist, 2.0);
-
-        // 4. Direction (Robot -> Ball)
-        // We only care about the direction TO the ball
-        if (distToBall > 0.001) {
-          const dirX = (ballX - robot.x) / distToBall;
-          const dirY = (ballY - robot.y) / distToBall;
-
-          sumX += dirX * force;
-          sumY += dirY * force;
-        }
-      }
+    // Check if this is the excluded ball (approximate float match)
+    if (
+      excludeBall &&
+      Math.abs(c - excludeBall.x) < 0.1 &&
+      Math.abs(r - excludeBall.y) < 0.1
+    ) {
+      return;
     }
-  }
+
+    const ballX = c + 0.5;
+    const ballY = r + 0.5;
+
+    // 1. Calculate Potential Gain
+    const currentEV = getBallEV(ballX, ballY, robot.team, field);
+    const gain = stagingEV - currentEV;
+
+    if (gain <= 0.01) return;
+
+    // 2. Calculate Cost (Total Distance)
+    const dxToBall = ballX - robot.x;
+    const dyToBall = ballY - robot.y;
+    const distToBallSq = dxToBall * dxToBall + dyToBall * dyToBall;
+    const distToBall = Math.sqrt(distToBallSq);
+
+    const dxToStaging = stagingLoc.x - ballX;
+    const dyToStaging = stagingLoc.y - ballY;
+    const distToStaging = Math.sqrt(dxToStaging * dxToStaging + dyToStaging * dyToStaging);
+    const totalDist = distToBall + distToStaging;
+
+    if (totalDist < 0.001) return;
+
+    // 3. Force Magnitude = Gain / Cost^2
+    const force = gain / (totalDist * totalDist);
+
+    // 4. Direction (Robot -> Ball)
+    if (distToBall > 0.001) {
+      const dirX = dxToBall / distToBall;
+      const dirY = dyToBall / distToBall;
+
+      sumX += dirX * force;
+      sumY += dirY * force;
+    }
+  });
 
   // Normalize if significant
   const mag = Math.sqrt(sumX * sumX + sumY * sumY);

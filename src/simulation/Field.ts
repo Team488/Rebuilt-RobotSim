@@ -33,6 +33,7 @@ export class Field {
   grid: FieldTile[][];
   scoringLocations: ScoringLocation[];
   flyingBalls: FlyingBall[] = [];
+  ballPositions: Set<number> = new Set();
   engine?: EngineInterface;
 
   readonly leftBoundaryX: number;
@@ -55,14 +56,35 @@ export class Field {
     return r >= 0 && r < this.height && c >= 0 && c < this.width;
   }
 
-  isPassable(r: number, c: number): boolean {
-    return this.isValidTile(r, c) && this.grid[r][c] !== FieldTile.WALL;
+  isPassable(r: number, c: number, ignoreRobots: boolean = false): boolean {
+    if (!this.isValidTile(r, c)) return false;
+    if (this.grid[r][c] === FieldTile.WALL) return false;
+
+    if (!ignoreRobots && this.engine) {
+      // Check if any robot is in this tile
+      for (const robot of this.engine.robots) {
+        if (Math.floor(robot.y) === r && Math.floor(robot.x) === c) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   setTileAt(x: number, y: number, tile: FieldTile): boolean {
     const r = Math.floor(y);
     const c = Math.floor(x);
     if (this.isValidTile(r, c)) {
+      const oldTile = this.grid[r][c];
+      const pos = r * this.width + c;
+
+      if (oldTile === FieldTile.BALL && tile !== FieldTile.BALL) {
+        this.ballPositions.delete(pos);
+      } else if (oldTile !== FieldTile.BALL && tile === FieldTile.BALL) {
+        this.ballPositions.add(pos);
+      }
+
       this.grid[r][c] = tile;
       return true;
     }
@@ -141,6 +163,15 @@ export class Field {
       }
     }
 
+    // Initialize ballPositions
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (grid[r][c] === FieldTile.BALL) {
+          this.ballPositions.add(r * cols + c);
+        }
+      }
+    }
+
     return grid;
   }
 
@@ -165,9 +196,7 @@ export class Field {
     if (openSlots.length > 0) {
       const randomIndex = Math.floor(Math.random() * openSlots.length);
       const { r, c } = openSlots[randomIndex];
-      this.grid[r][c] = FieldTile.BALL;
-    } else {
-      console.warn("No open slots found in neutral zone for ball respawn!");
+      this.setTileAt(c, r, FieldTile.BALL);
     }
   }
 
@@ -192,7 +221,7 @@ export class Field {
     const isRed = team === TEAM_RED;
     const centerX = isRed
       ? (FIELD_WIDTH * ZONE_RATIO_LEFT) / 2
-      : FIELD_WIDTH * (1 + ZONE_RATIO_RIGHT) / 2;
+      : (FIELD_WIDTH * (1 + ZONE_RATIO_RIGHT)) / 2;
 
     return [
       { x: centerX, y: FIELD_HEIGHT / 3 },
@@ -208,20 +237,16 @@ export class Field {
     const visited = new Set<string>();
     visited.add(`${startR},${startC}`);
 
-    // Breadth-first search for nearest empty or ball tile
-
     while (queue.length > 0) {
       const { r, c } = queue.shift()!;
 
-      // Check bounds
       if (this.isValidTile(r, c)) {
         const isScoringLocation = this.getScoringLocationAt(c, r);
 
         if (this.grid[r][c] === FieldTile.EMPTY && !isScoringLocation) {
-          return { x: c + 0.5, y: r + 0.5 }; // Return center of tile
+          return { x: c + 0.5, y: r + 0.5 };
         }
 
-        // Add neighbors
         const neighbors = [
           { r: r + 1, c: c },
           { r: r - 1, c: c },
