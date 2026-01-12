@@ -7,7 +7,7 @@ export type Action =
   | { type: "DROP" };
 
 export interface RobotStrategy {
-  moveSpeed: number; // Meters per second
+  name: string;
   actionTime: number; // Seconds
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null;
