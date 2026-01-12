@@ -11,6 +11,10 @@ import {
 } from "./GameConst";
 import { ScoringLocation } from "./ScoringLocation";
 
+export interface EngineInterface {
+  robots: any[];
+}
+
 export interface FlyingBall {
   x: number;
   y: number;
@@ -30,6 +34,7 @@ export class Field {
   grid: FieldTile[][];
   scoringLocations: ScoringLocation[];
   flyingBalls: FlyingBall[] = [];
+  engine?: EngineInterface;
 
   constructor(
     width: number = FIELD_WIDTH,

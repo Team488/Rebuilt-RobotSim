@@ -18,6 +18,7 @@ import { isInTeamZone, roughGaussian } from "./StrategyUtils";
 import { ALL_ACTIVE_STRATEGIES, ALL_INACTIVE_STRATEGIES } from "./strategies";
 
 const STORAGE_KEY = "robot_configs_v1";
+const TEAM_STORAGE_KEY = "saved_team_configs_v1";
 
 interface RobotConfig {
   id: string;
@@ -55,6 +56,7 @@ export class Engine {
 
   constructor() {
     this.field = new StartingField();
+    this.field.engine = this;
     this.robots = [];
     this.initializeGame(false); // Initial load, don't preserve (but will load from cache)
   }
@@ -166,6 +168,94 @@ export class Engine {
     }
     return [];
   }
+
+  getRobotConfig(robot: Robot): RobotConfig {
+    return {
+      id: robot.id,
+      scoringStrategy: robot.scoringStrategy.name,
+      collectionStrategy: robot.collectionStrategy.name,
+      moveSpeed: robot.moveSpeed,
+      maxBalls: robot.maxBalls,
+      baseShotCooldown: robot.baseShotCooldown,
+      maxShootDistance: robot.maxShootDistance,
+      accuracyMin: robot.accuracyMin,
+      accuracyMax: robot.accuracyMax,
+    };
+  }
+
+  applyRobotConfig(robot: Robot, config: RobotConfig) {
+    const ActiveClass = ALL_ACTIVE_STRATEGIES.find(
+      (S) => new S().name === config.scoringStrategy,
+    );
+    if (ActiveClass) robot.scoringStrategy = new ActiveClass();
+
+    const InactiveClass = ALL_INACTIVE_STRATEGIES.find(
+      (S) => new S().name === config.collectionStrategy,
+    );
+    if (InactiveClass) robot.collectionStrategy = new InactiveClass();
+
+    if (config.moveSpeed !== undefined) robot.moveSpeed = config.moveSpeed;
+    if (config.maxBalls !== undefined) robot.maxBalls = config.maxBalls;
+    if (config.baseShotCooldown !== undefined)
+      robot.baseShotCooldown = config.baseShotCooldown;
+    if (config.maxShootDistance !== undefined)
+      robot.maxShootDistance = config.maxShootDistance;
+    if (config.accuracyMin !== undefined)
+      robot.accuracyMin = config.accuracyMin;
+    if (config.accuracyMax !== undefined)
+      robot.accuracyMax = config.accuracyMax;
+  }
+
+  getSavedTeams(): { name: string; robots: RobotConfig[] }[] {
+    try {
+      const stored = localStorage.getItem(TEAM_STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to load team configs", e);
+    }
+    return [];
+  }
+
+  saveTeam(team: Team, name: string) {
+    const teamRobots = this.robots.filter((r) => r.team === team);
+    const teamConfigs = teamRobots.map((r) => this.getRobotConfig(r));
+
+    const savedTeams = this.getSavedTeams();
+    const existingIndex = savedTeams.findIndex((t) => t.name === name);
+
+    if (existingIndex >= 0) {
+      savedTeams[existingIndex].robots = teamConfigs;
+    } else {
+      savedTeams.push({ name, robots: teamConfigs });
+    }
+
+    localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(savedTeams));
+  }
+
+  loadTeam(targetTeam: Team, name: string) {
+    const savedTeams = this.getSavedTeams();
+    const teamToLoad = savedTeams.find((t) => t.name === name);
+
+    if (teamToLoad) {
+      const targetRobots = this.robots.filter((r) => r.team === targetTeam);
+      targetRobots.forEach((robot, index) => {
+        // Find config in the saved team for the corresponding robot index
+        // Or match by relative ID (e.g., R1, R2, R3)
+        // Let's match by index since teams are 3 robots.
+        if (teamToLoad.robots[index]) {
+          this.applyRobotConfig(robot, teamToLoad.robots[index]);
+        }
+      });
+      this.saveConfigs(); // Update current session cache
+    }
+  }
+
+  deleteTeam(name: string) {
+    const savedTeams = this.getSavedTeams();
+    const filtered = savedTeams.filter((t) => t.name !== name);
+    localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(filtered));
+  }
+
 
   start() {
     if (this.isRunning) return;
