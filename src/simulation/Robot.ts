@@ -37,7 +37,9 @@ export class Robot {
   moveSpeed: number = 10;
   shotCooldown: number = 0;
   baseShotCooldown: number = 5;
-  maxShootDistance: number = 100;
+  maxShootDistance: number = 10;
+  accuracyMin: number = 0.3;
+  accuracyMax: number = 0.9;
 
   scoringStrategy: RobotStrategy;
   collectionStrategy: RobotStrategy;
