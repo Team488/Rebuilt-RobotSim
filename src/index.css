@@ -928,3 +928,25 @@ h4 {
   background: #e6f7ff;
   border-left: 4px solid #1890ff;
 }
+
+.team-delete-btn {
+  background: none !important;
+  border: none !important;
+  color: #ff4d4f !important;
+  font-size: 20px !important;
+  cursor: pointer;
+  padding: 4px 8px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  box-shadow: none !important;
+  margin-left: 10px;
+}
+
+.team-delete-btn:hover {
+  background: rgba(255, 77, 79, 0.1) !important;
+  transform: scale(1.1) translateY(0) !important;
+}

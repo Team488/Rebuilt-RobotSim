@@ -11,7 +11,8 @@ import {
 } from "../StrategyUtils";
 
 export class StagingScoringStrategy extends ActiveScoringStrategy {
-  name = "Staging Scorer";
+  id = "staging_scoring";
+  name = "Staging Scoring";
   actionTime = 0.8;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {

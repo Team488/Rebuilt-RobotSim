@@ -9,6 +9,7 @@ import {
 } from "../StrategyUtils";
 
 export class LongRangeSniperStrategy extends ActiveScoringStrategy {
+    id = "long_range_sniper";
     name = "Long-Range Sniper";
     actionTime = 0.8;
 

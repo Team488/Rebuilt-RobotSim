@@ -113,12 +113,12 @@ export class Engine {
         const config = cachedConfigs.find((c) => c.id === id);
         if (config) {
           const ActiveClass = ALL_ACTIVE_STRATEGIES.find(
-            (S) => new S().name === config.scoringStrategy,
+            (S) => new S().id === config.scoringStrategy,
           );
           if (ActiveClass) robot.scoringStrategy = new ActiveClass();
 
           const InactiveClass = ALL_INACTIVE_STRATEGIES.find(
-            (S) => new S().name === config.collectionStrategy,
+            (S) => new S().id === config.collectionStrategy,
           );
           if (InactiveClass) robot.collectionStrategy = new InactiveClass();
 
@@ -144,8 +144,8 @@ export class Engine {
     try {
       const configs: RobotConfig[] = this.robots.map((r) => ({
         id: r.id,
-        scoringStrategy: r.scoringStrategy.name,
-        collectionStrategy: r.collectionStrategy.name,
+        scoringStrategy: r.scoringStrategy.id,
+        collectionStrategy: r.collectionStrategy.id,
         moveSpeed: r.moveSpeed,
         maxBalls: r.maxBalls,
         baseShotCooldown: r.baseShotCooldown,
@@ -172,8 +172,8 @@ export class Engine {
   getRobotConfig(robot: Robot): RobotConfig {
     return {
       id: robot.id,
-      scoringStrategy: robot.scoringStrategy.name,
-      collectionStrategy: robot.collectionStrategy.name,
+      scoringStrategy: robot.scoringStrategy.id,
+      collectionStrategy: robot.collectionStrategy.id,
       moveSpeed: robot.moveSpeed,
       maxBalls: robot.maxBalls,
       baseShotCooldown: robot.baseShotCooldown,
@@ -185,12 +185,12 @@ export class Engine {
 
   applyRobotConfig(robot: Robot, config: RobotConfig) {
     const ActiveClass = ALL_ACTIVE_STRATEGIES.find(
-      (S) => new S().name === config.scoringStrategy,
+      (S) => new S().id === config.scoringStrategy,
     );
     if (ActiveClass) robot.scoringStrategy = new ActiveClass();
 
     const InactiveClass = ALL_INACTIVE_STRATEGIES.find(
-      (S) => new S().name === config.collectionStrategy,
+      (S) => new S().id === config.collectionStrategy,
     );
     if (InactiveClass) robot.collectionStrategy = new InactiveClass();
 
@@ -254,6 +254,21 @@ export class Engine {
     const savedTeams = this.getSavedTeams();
     const filtered = savedTeams.filter((t) => t.name !== name);
     localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(filtered));
+  }
+
+  importTeams(newTeams: { name: string; robots: RobotConfig[] }[]) {
+    const savedTeams = this.getSavedTeams();
+
+    newTeams.forEach(newTeam => {
+      const existingIndex = savedTeams.findIndex(t => t.name === newTeam.name);
+      if (existingIndex >= 0) {
+        savedTeams[existingIndex] = newTeam;
+      } else {
+        savedTeams.push(newTeam);
+      }
+    });
+
+    localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(savedTeams));
   }
 
 

@@ -65,6 +65,42 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
         URL.revokeObjectURL(url);
     };
 
+    const handleImportZip = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const zip = await JSZip.loadAsync(file);
+            const teamConfigs: any[] = [];
+
+            for (const filename of Object.keys(zip.files)) {
+                if (filename.endsWith(".json")) {
+                    const content = await zip.files[filename].async("text");
+                    try {
+                        const team = JSON.parse(content);
+                        if (team.name && team.robots) {
+                            teamConfigs.push(team);
+                        }
+                    } catch (err) {
+                        console.error(`Failed to parse ${filename}`, err);
+                    }
+                }
+            }
+
+            if (teamConfigs.length > 0) {
+                engine.importTeams(teamConfigs);
+                onUpdate();
+                alert(`Successfully imported ${teamConfigs.length} team(s)!`);
+            }
+        } catch (err) {
+            console.error("Failed to load zip file", err);
+            alert("Failed to load zip file. Make sure it's a valid robot teams export.");
+        }
+
+        // Reset input
+        e.target.value = "";
+    };
+
     const savedTeams = engine.getSavedTeams();
 
     return (
@@ -75,12 +111,25 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                 <button onClick={() => setShowSaveModal(true)} className="secondary-button">
                     <span>💾</span> Save Team Config
                 </button>
-                <button onClick={() => setShowLoadModal(true)} className="secondary-button">
+                <button onClick={() => { setTeamToLoad(null); setShowLoadModal(true); }} className="secondary-button">
                     <span>📂</span> Load Team Config
                 </button>
                 <button onClick={handleExportTeams} className="secondary-button">
                     <span>📥</span> Export All (.zip)
                 </button>
+                <button
+                    onClick={() => document.getElementById('zip-import-input')?.click()}
+                    className="secondary-button"
+                >
+                    <span>📤</span> Import Zip
+                </button>
+                <input
+                    id="zip-import-input"
+                    type="file"
+                    accept=".zip"
+                    style={{ display: 'none' }}
+                    onChange={handleImportZip}
+                />
             </div>
 
             <div className="robot-grid">
@@ -97,10 +146,10 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                 <div className="input-group">
                                     <label>Active Strat</label>
                                     <select
-                                        value={robot.scoringStrategy.name}
+                                        value={robot.scoringStrategy.id}
                                         onChange={(e) => {
                                             const StratClass = ALL_ACTIVE_STRATEGIES.find(
-                                                (S) => new S().name === e.target.value,
+                                                (S) => new S().id === e.target.value,
                                             );
                                             if (StratClass) {
                                                 robot.scoringStrategy = new StratClass();
@@ -110,7 +159,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                         }}
                                     >
                                         {activeOptions.map((opt) => (
-                                            <option key={opt.name} value={opt.name}>
+                                            <option key={opt.id} value={opt.id}>
                                                 {opt.name}
                                             </option>
                                         ))}
@@ -120,10 +169,10 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                 <div className="input-group">
                                     <label>Inactive Strat</label>
                                     <select
-                                        value={robot.collectionStrategy.name}
+                                        value={robot.collectionStrategy.id}
                                         onChange={(e) => {
                                             const StratClass = ALL_INACTIVE_STRATEGIES.find(
-                                                (S) => new S().name === e.target.value,
+                                                (S) => new S().id === e.target.value,
                                             );
                                             if (StratClass) {
                                                 robot.collectionStrategy = new StratClass();
@@ -133,7 +182,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                         }}
                                     >
                                         {inactiveOptions.map((opt) => (
-                                            <option key={opt.name} value={opt.name}>
+                                            <option key={opt.id} value={opt.id}>
                                                 {opt.name}
                                             </option>
                                         ))}
@@ -304,9 +353,14 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                         >
                                             <span>{t.name}</span>
                                             <button
-                                                className="clear-btn"
-                                                onClick={(e) => { e.stopPropagation(); engine.deleteTeam(t.name); onUpdate(); }}
-                                                style={{ padding: '2px 6px' }}
+                                                className="team-delete-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    engine.deleteTeam(t.name);
+                                                    if (teamToLoad === t.name) setTeamToLoad(null);
+                                                    onUpdate();
+                                                }}
+                                                title="Delete Config"
                                             >
                                                 ×
                                             </button>
