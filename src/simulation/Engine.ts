@@ -1,5 +1,5 @@
 import { Field, StartingField } from "./Field";
-import { Robot, type RobotStrategy } from "./Robot";
+import { Robot } from "./Robot";
 import { BasicScoringStrategy } from "./strategies/BasicScoringStrategy";
 import { BasicCollectorStrategy } from "./strategies/BasicCollectorStrategy";
 import {
@@ -84,26 +84,28 @@ export class Engine {
       const startY = 1 + i * 2;
       const id = `${team === TEAM_RED ? "R" : "B"}${i + 1}`;
 
-      let scoringStrat: RobotStrategy = new BasicScoringStrategy();
-      let collectionStrat: RobotStrategy = new BasicCollectorStrategy();
-      let moveSpeed = 3.5;
-      let maxBalls = 3;
-      let baseShotCooldown = 5;
-      let maxShootDistance = 10;
-      let accuracyMin = 0.3;
-      let accuracyMax = 0.9;
+      // Create robot with default strategies and default values from Robot class
+      // Note: Robot class defaults (moveSpeed=10, maxBalls=3, etc.) will be used
+      const robot = new Robot(
+        id,
+        startX,
+        startY,
+        team,
+        new BasicScoringStrategy(),
+        new BasicCollectorStrategy(),
+      );
 
       // Priority 1: Preserve from current session if requested
       const oldRobot = oldRobots?.find((r) => r.id === id);
       if (oldRobot) {
-        scoringStrat = oldRobot.scoringStrategy;
-        collectionStrat = oldRobot.collectionStrategy;
-        moveSpeed = oldRobot.moveSpeed;
-        maxBalls = oldRobot.maxBalls;
-        baseShotCooldown = oldRobot.baseShotCooldown;
-        maxShootDistance = oldRobot.maxShootDistance;
-        accuracyMin = oldRobot.accuracyMin;
-        accuracyMax = oldRobot.accuracyMax;
+        robot.scoringStrategy = oldRobot.scoringStrategy;
+        robot.collectionStrategy = oldRobot.collectionStrategy;
+        robot.moveSpeed = oldRobot.moveSpeed;
+        robot.maxBalls = oldRobot.maxBalls;
+        robot.baseShotCooldown = oldRobot.baseShotCooldown;
+        robot.maxShootDistance = oldRobot.maxShootDistance;
+        robot.accuracyMin = oldRobot.accuracyMin;
+        robot.accuracyMax = oldRobot.accuracyMax;
       } else {
         // Priority 2: Load from cache
         const config = cachedConfigs.find((c) => c.id === id);
@@ -111,36 +113,26 @@ export class Engine {
           const ActiveClass = ALL_ACTIVE_STRATEGIES.find(
             (S) => new S().name === config.scoringStrategy,
           );
-          if (ActiveClass) scoringStrat = new ActiveClass();
+          if (ActiveClass) robot.scoringStrategy = new ActiveClass();
 
           const InactiveClass = ALL_INACTIVE_STRATEGIES.find(
             (S) => new S().name === config.collectionStrategy,
           );
-          if (InactiveClass) collectionStrat = new InactiveClass();
+          if (InactiveClass) robot.collectionStrategy = new InactiveClass();
 
-          moveSpeed = config.moveSpeed ?? 3.5;
-          maxBalls = config.maxBalls ?? 3;
-          baseShotCooldown = config.baseShotCooldown ?? 5;
-          maxShootDistance = config.maxShootDistance ?? 10;
-          accuracyMin = config.accuracyMin ?? 0.3;
-          accuracyMax = config.accuracyMax ?? 0.9;
+          if (config.moveSpeed !== undefined)
+            robot.moveSpeed = config.moveSpeed;
+          if (config.maxBalls !== undefined) robot.maxBalls = config.maxBalls;
+          if (config.baseShotCooldown !== undefined)
+            robot.baseShotCooldown = config.baseShotCooldown;
+          if (config.maxShootDistance !== undefined)
+            robot.maxShootDistance = config.maxShootDistance;
+          if (config.accuracyMin !== undefined)
+            robot.accuracyMin = config.accuracyMin;
+          if (config.accuracyMax !== undefined)
+            robot.accuracyMax = config.accuracyMax;
         }
       }
-
-      const robot = new Robot(
-        id,
-        startX,
-        startY,
-        team,
-        scoringStrat,
-        collectionStrat,
-      );
-      robot.moveSpeed = moveSpeed;
-      robot.maxBalls = maxBalls;
-      robot.baseShotCooldown = baseShotCooldown;
-      robot.maxShootDistance = maxShootDistance;
-      robot.accuracyMin = accuracyMin;
-      robot.accuracyMax = accuracyMax;
 
       this.robots.push(robot);
     }
