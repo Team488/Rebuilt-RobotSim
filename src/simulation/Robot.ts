@@ -8,6 +8,7 @@ export type Action =
 
 export interface RobotStrategy {
   name: string;
+  status: string;
   actionTime: number; // Seconds
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null;
@@ -16,6 +17,7 @@ export interface RobotStrategy {
 
 export abstract class BaseStrategy implements RobotStrategy {
   abstract name: string;
+  status: string = "";
   abstract actionTime: number;
 
   abstract decideMove(robot: Robot, field: Field): { x: number; y: number } | null;

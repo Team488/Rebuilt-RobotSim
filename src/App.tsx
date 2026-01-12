@@ -71,20 +71,6 @@ function App() {
         flex: 1,
         overflow: "hidden"
       }}>
-        <header style={{
-          padding: "15px 30px",
-          background: "#ffffff",
-          color: "#1a1a1a",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          boxShadow: "0 1px 5px rgba(0,0,0,0.1)",
-          flexShrink: 0,
-          borderBottom: "1px solid #eee"
-        }}>
-          <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "800", letterSpacing: "0.5px" }}>FRC 2026 REBUILT SIM</h1>
-        </header>
-
         <main style={{
           flex: 1,
           display: "flex",

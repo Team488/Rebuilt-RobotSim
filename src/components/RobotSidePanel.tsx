@@ -42,6 +42,29 @@ export const RobotSidePanel: React.FC<RobotSidePanelProps> = ({ engine }) => {
                         <div style={{ fontSize: "12px", color: "#666" }}>
                             Pos: ({r.x.toFixed(1)}, {r.y.toFixed(1)})
                         </div>
+                        <div style={{
+                            fontSize: "12px",
+                            marginTop: "6px",
+                            padding: "6px 10px",
+                            background: "rgba(0,0,0,0.03)",
+                            borderRadius: "6px",
+                            fontWeight: "500",
+                            color: "#333",
+                            border: `1px solid ${r.team === "RED" ? "#ff4d4d22" : "#4d79ff22"}`,
+                            letterSpacing: "0.2px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px"
+                        }}>
+                            <span style={{
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                background: r.team === "RED" ? "#ff4d4d" : "#4d79ff",
+                                boxShadow: `0 0 6px ${r.team === "RED" ? "#ff4d4d88" : "#4d79ff88"}`
+                            }}></span>
+                            {r.currentStrategy.status || "Analyzing field..."}
+                        </div>
                         <div style={{ fontSize: "14px", marginTop: "4px", fontWeight: "600" }}>
                             Balls: {r.ballCount} / {r.maxBalls}
                         </div>
