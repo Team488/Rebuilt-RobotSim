@@ -193,10 +193,10 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                             {/* Robot Constants Rows */}
                             <div className="params-row">
                                 <div className="input-group">
-                                    <label>Speed (m/s)</label>
+                                    <label>Speed (u/tick)</label>
                                     <input
                                         type="number"
-                                        step="0.1"
+                                        step="0.05"
                                         value={robot.moveSpeed}
                                         onChange={(e) => {
                                             robot.moveSpeed = parseFloat(e.target.value) || 0;
@@ -221,7 +221,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
 
                             <div className="params-row">
                                 <div className="input-group">
-                                    <label>Shot Delay</label>
+                                    <label>Shot Delay (ticks)</label>
                                     <input
                                         type="number"
                                         value={robot.baseShotCooldown}
