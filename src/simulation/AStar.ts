@@ -14,6 +14,7 @@ export class AStar {
     field: Field,
     start: { x: number; y: number },
     target: { x: number; y: number },
+    robotIdToIgnore?: string,
   ): { x: number; y: number }[] | null {
     // Convert to grid coordinates
     const startX = Math.floor(start.x);
@@ -22,12 +23,11 @@ export class AStar {
     const targetY = Math.floor(target.y);
 
     // Bounds check
-    // Bounds check
-    if (!field.isPassable(targetY, targetX)) {
+    if (!field.isPassable(targetY, targetX, false, robotIdToIgnore)) {
       // If target is an obstacle, try to find nearest valid tile
-      const nearest = this.findNearestValidTile(field, targetX, targetY);
+      const nearest = this.findNearestValidTile(field, targetX, targetY, robotIdToIgnore);
       if (!nearest) return null;
-      return this.findPath(field, start, nearest);
+      return this.findPath(field, start, nearest, robotIdToIgnore);
     }
 
     const openList: Node[] = [];
@@ -80,13 +80,13 @@ export class AStar {
       ];
 
       for (const neighbor of neighbors) {
-        if (!field.isPassable(neighbor.y, neighbor.x)) continue;
+        if (!field.isPassable(neighbor.y, neighbor.x, false, robotIdToIgnore)) continue;
         const neighborKey = neighbor.y * field.width + neighbor.x;
         if (closedSet.has(neighborKey)) continue;
 
         // For diagonals, check if "squeezing" through obstacles
         if (neighbor.dist > 1) {
-          if (!field.isPassable(current.y, neighbor.x) || !field.isPassable(neighbor.y, current.x)) {
+          if (!field.isPassable(current.y, neighbor.x, false, robotIdToIgnore) || !field.isPassable(neighbor.y, current.x, false, robotIdToIgnore)) {
             continue; // Can't move diagonally if both adjacent tiles are blocked
           }
         }
@@ -143,16 +143,17 @@ export class AStar {
     field: Field,
     x: number,
     y: number,
+    robotIdToIgnore?: string,
   ): { x: number; y: number } | null {
     // Simple BFS to find nearest non-obstacle tile if target is in obstacle
     const queue: { x: number; y: number }[] = [{ x, y }];
     const visited = new Set<number>();
-    visited.add(y * field.width + x);
+    visited.add(Math.floor(y) * field.width + Math.floor(x));
 
     while (queue.length > 0) {
       const curr = queue.shift()!;
 
-      if (field.isPassable(curr.y, curr.x)) {
+      if (field.isPassable(curr.y, curr.x, false, robotIdToIgnore)) {
         return { x: curr.x + 0.5, y: curr.y + 0.5 };
       }
 
