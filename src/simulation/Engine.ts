@@ -338,8 +338,6 @@ export class Engine {
       return;
     }
 
-    if (this.time === 0) console.log("Engine Tick Started");
-
     this.time += SECONDS_PER_TICK;
     this.modeTimer++;
 
@@ -349,7 +347,6 @@ export class Engine {
       this.currentScoringTeam =
         this.currentScoringTeam === TEAM_RED ? TEAM_BLUE : TEAM_RED;
       this.updateRobotModes();
-      console.log(`Switched Scoring Team to ${this.currentScoringTeam}`);
     }
 
     // Update Flying Balls
@@ -383,9 +380,6 @@ export class Engine {
             } else {
               this.scoreBlue++;
             }
-            console.log(
-              `GOAL! ${scoringLoc.team} scores! Total: Red ${this.scoreRed} - Blue ${this.scoreBlue}`,
-            );
 
             // Ball is consumed/scored. Do not place on grid.
             // Optionally respawn a new ball elsewhere?
@@ -394,9 +388,6 @@ export class Engine {
           } else {
             // Inactive OR Invalid Origin -> Treat as occupied.
             // Fall through to findNearestOpenNode
-            if (!validOrigin && scoringLoc.active) {
-              console.log(`Shot INVALID (Wrong Zone) for ${scoringLoc.team}`);
-            }
           }
         } else {
           // Check if landing on empty tile logic
@@ -439,7 +430,6 @@ export class Engine {
         ) {
           this.field.setTileAt(robot.x, robot.y, FieldTile.EMPTY);
           robot.ballCount++;
-          console.log(`${robot.id} collected ball. Count: ${robot.ballCount}`);
         }
       } else if (action?.type === "SHOOT") {
         if (robot.ballCount > 0 && robot.shotCooldown <= 0) {
@@ -478,23 +468,18 @@ export class Engine {
           });
 
           robot.shotCooldown = robot.baseShotCooldown;
-          console.log(`${robot.id} SHOT ball with ${Math.round(percentage * 100)}% accuracy.`);
         }
       } else if (action?.type === "DROP") {
         if (robot.ballCount > 0) {
           if (this.field.getTileAt(robot.x, robot.y) === FieldTile.EMPTY) {
             if (this.field.setTileAt(robot.x, robot.y, FieldTile.BALL)) {
               robot.ballCount--;
-              console.log(`${robot.id} dropped ball.`);
             }
           }
         }
       }
     });
 
-    if (this.onTick) {
-      this.onTick(this);
-    }
   }
 
   updateRobotModes() {
