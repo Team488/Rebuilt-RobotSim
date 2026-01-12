@@ -27,6 +27,8 @@ interface RobotConfig {
   maxBalls: number;
   baseShotCooldown: number;
   maxShootDistance: number;
+  accuracyMin: number;
+  accuracyMax: number;
 }
 
 export interface GameResult {
