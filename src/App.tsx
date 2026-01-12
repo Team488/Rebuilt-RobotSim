@@ -14,11 +14,34 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
 
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  const [leftOpen, setLeftOpen] = useState(window.innerWidth > 1024);
+  const [rightOpen, setRightOpen] = useState(window.innerWidth > 1024);
+
+  // Close sidebars on mobile when clicking outside
+  const closeSidebars = () => {
+    if (window.innerWidth <= 1024) {
+      setLeftOpen(false);
+      setRightOpen(false);
+    }
+  };
 
   const forceUpdate = useCallback(() => {
     setTick((t) => t + 1);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setLeftOpen(true);
+        setRightOpen(true);
+      } else {
+        setLeftOpen(false);
+        setRightOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -59,6 +82,23 @@ function App() {
 
   return (
     <div className={`app-container ${(leftOpen || rightOpen) ? "sidebar-open" : ""}`}>
+      {/* Mobile Overlay */}
+      {(leftOpen || rightOpen) && window.innerWidth <= 1024 && (
+        <div
+          className="mobile-overlay-actual"
+          onClick={closeSidebars}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 45,
+            background: 'transparent'
+          }}
+        />
+      )}
+
       {/* Left Sidebar: Game Log */}
       <div className={`sidebar left-sidebar ${!leftOpen ? "closed-mobile" : ""}`} style={{
         width: leftOpen ? "320px" : "0px",
@@ -133,10 +173,22 @@ function App() {
 
       {/* Mobile Menu Toggle Floating Buttons */}
       <div className="mobile-menu-toggle">
-        <button onClick={() => setLeftOpen(!leftOpen)} style={{ backgroundColor: leftOpen ? "#333" : "#fff", color: leftOpen ? "#fff" : "#333" }}>
+        <button
+          onClick={() => {
+            setLeftOpen(!leftOpen);
+            setRightOpen(false);
+          }}
+          style={{ backgroundColor: leftOpen ? "#333" : "#fff", color: leftOpen ? "#fff" : "#333" }}
+        >
           Log {leftOpen ? "×" : "≡"}
         </button>
-        <button onClick={() => setRightOpen(!rightOpen)} style={{ backgroundColor: rightOpen ? "#333" : "#fff", color: rightOpen ? "#fff" : "#333" }}>
+        <button
+          onClick={() => {
+            setRightOpen(!rightOpen);
+            setLeftOpen(false);
+          }}
+          style={{ backgroundColor: rightOpen ? "#333" : "#fff", color: rightOpen ? "#fff" : "#333" }}
+        >
           Intell {rightOpen ? "×" : "≡"}
         </button>
       </div>

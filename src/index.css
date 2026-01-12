@@ -17,6 +17,7 @@ body {
 #root {
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   text-align: left;
@@ -90,6 +91,7 @@ h4 {
 .app-container {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
 }
@@ -130,10 +132,12 @@ h4 {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 20px;
   overflow-y: auto;
+  overflow-x: hidden;
   background-color: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .field-container {
@@ -144,6 +148,8 @@ h4 {
   flex-shrink: 0;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateZ(0);
+  width: fit-content;
+  margin: 0 auto;
   max-width: 100%;
 }
 
@@ -166,6 +172,7 @@ h4 {
     top: 0;
     bottom: 0;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    max-width: 80vw;
   }
 
   .left-sidebar {
@@ -176,6 +183,7 @@ h4 {
   .left-sidebar.closed-mobile {
     transform: translateX(-100%);
     width: 0 !important;
+    pointer-events: none;
   }
 
   .right-sidebar {
@@ -186,6 +194,7 @@ h4 {
   .right-sidebar.closed-mobile {
     transform: translateX(100%);
     width: 0 !important;
+    pointer-events: none;
   }
 
   /* When sidebars are open on mobile, maybe dim the main content */
@@ -196,20 +205,20 @@ h4 {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     z-index: 40;
     backdrop-filter: blur(2px);
+    pointer-events: auto;
+  }
+
+  .side-panel-toggle {
+    display: none !important;
   }
 }
 
 @media (max-width: 768px) {
   .main-scroll-area {
     padding: 10px;
-  }
-
-  .field-container {
-    padding: 4px;
-    border-radius: 8px;
   }
 }
 
@@ -226,6 +235,10 @@ h4 {
 @media (max-width: 1024px) {
   .mobile-menu-toggle {
     display: flex;
+  }
+
+  .main-scroll-area {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
