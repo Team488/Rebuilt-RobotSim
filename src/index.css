@@ -249,10 +249,14 @@ h4 {
   .action-buttons {
     width: 100%;
     justify-content: center;
+    gap: 8px;
   }
 
   .action-buttons button {
     flex: 1;
+    min-width: 0;
+    padding: 0.5em 0.8em;
+    font-size: 0.85em;
   }
 
   .divider {
@@ -262,6 +266,23 @@ h4 {
   .speed-controls {
     width: 100%;
     justify-content: center;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .speed-label {
+    font-size: 0.75rem;
+    min-width: 70px;
+  }
+
+  .speed-buttons {
+    gap: 3px;
+  }
+
+  .speed-btn {
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    min-width: 28px;
   }
 }
 
@@ -399,11 +420,47 @@ h4 {
 
   .controls-group {
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
   }
 
   .divider {
     display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .control-panel-container {
+    padding: 10px 5px;
+  }
+
+  .score-display {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .score-item {
+    font-size: 0.75rem;
+  }
+
+  .action-buttons button {
+    padding: 0.4em 0.6em;
+    font-size: 0.8em;
+  }
+
+  .speed-controls {
+    padding: 5px 8px;
+    gap: 6px;
+  }
+
+  .speed-label {
+    font-size: 0.7rem;
+    min-width: 65px;
+  }
+
+  .speed-btn {
+    padding: 2px 5px !important;
+    font-size: 9px !important;
+    min-width: 24px;
   }
 }
 
