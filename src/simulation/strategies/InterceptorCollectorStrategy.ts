@@ -21,6 +21,7 @@ export class InterceptorCollectorStrategy extends InactiveScoringStrategy {
         }
 
         if (this.isDelivering) {
+            this.status = "Returning to staging";
             const stagingLoc = getStagingLocation(field, robot.team);
             if (stagingLoc) return getPathTarget(field, robot, { x: stagingLoc.x + 0.5, y: stagingLoc.y + 0.5 });
         }
@@ -37,9 +38,13 @@ export class InterceptorCollectorStrategy extends InactiveScoringStrategy {
             }
         );
 
-        if (neutralBall) return getPathTarget(field, robot, neutralBall);
+        if (neutralBall) {
+            this.status = "Intercepting in neutral zone";
+            return getPathTarget(field, robot, neutralBall);
+        }
 
         // Default: patrol the center line
+        this.status = "Patrolling the midline";
         const centerX = FIELD_WIDTH / 2;
         return getPathTarget(field, robot, { x: centerX, y: robot.y });
     }

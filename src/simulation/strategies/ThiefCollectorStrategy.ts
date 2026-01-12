@@ -25,6 +25,7 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
         if (!goal) return null;
 
         if (this.isDelivering) {
+            this.status = "Stealthily returning loot";
             const nearestEmpty = findNearestEmptyTile(
                 field,
                 { x: goal.tileX, y: goal.tileY },
@@ -46,7 +47,10 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
             }
         );
 
-        if (opponentBall) return getPathTarget(field, robot, opponentBall);
+        if (opponentBall) {
+            this.status = "Infiltrating opponent territory";
+            return getPathTarget(field, robot, opponentBall);
+        }
 
         const { ball: anyBall } = findBestEVBall(
             field,
@@ -54,8 +58,12 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
             { x: goal.tileX + 0.5, y: goal.tileY + 0.5 },
             1.0
         );
-        if (anyBall) return getPathTarget(field, robot, anyBall);
+        if (anyBall) {
+            this.status = "Scavenging for any balls";
+            return getPathTarget(field, robot, anyBall);
+        }
 
+        this.status = "Lurking";
         return null;
     }
 

@@ -32,6 +32,7 @@ export class BasicCollectorStrategy extends InactiveScoringStrategy {
 
     // Mode 2: Delivery (if currently delivering or full)
     if (this.isDelivering && robot.ballCount > 0) {
+      this.status = `Delivering ${robot.ballCount} balls`;
       // Find the NEAREST empty tile to the scoring location
       // Radius 4 covers the area around the goal without searching the whole field
       const nearestEmpty = findNearestEmptyTile(
@@ -47,6 +48,7 @@ export class BasicCollectorStrategy extends InactiveScoringStrategy {
 
     // Mode 1: Collection
     if (!this.isDelivering && robot.ballCount < robot.maxBalls) {
+      this.status = `Searching for balls (${robot.ballCount}/${robot.maxBalls})`;
       const { ball } = findBestEVBall(
         field,
         robot,
@@ -63,6 +65,7 @@ export class BasicCollectorStrategy extends InactiveScoringStrategy {
       }
     }
 
+    this.status = "Idle";
     return null;
   }
 

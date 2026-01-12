@@ -24,6 +24,7 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
         if (!stagingLoc) return null;
 
         if (this.isDelivering) {
+            this.status = "Moving to staging area";
             return getPathTarget(field, robot, { x: stagingLoc.x + 0.5, y: stagingLoc.y + 0.5 });
         }
 
@@ -33,8 +34,12 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
             { x: stagingLoc.x + 0.5, y: stagingLoc.y + 0.5 },
             1.0
         );
-        if (ball) return getPathTarget(field, robot, ball);
+        if (ball) {
+            this.status = "Collecting for staging";
+            return getPathTarget(field, robot, ball);
+        }
 
+        this.status = "Monitoring field";
         return null;
     }
 
