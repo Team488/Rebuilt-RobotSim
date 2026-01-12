@@ -296,6 +296,10 @@ export class Engine {
         this.tick();
         accumulator -= 1;
       }
+
+      if (this.onTick) {
+        this.onTick(this);
+      }
     }, 10);
   }
 
