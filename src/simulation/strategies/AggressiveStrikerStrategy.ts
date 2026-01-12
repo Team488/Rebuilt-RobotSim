@@ -18,6 +18,7 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
 
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         if (robot.ballCount >= robot.maxBalls) {
+            this.status = "Rushing to score";
             const scoreLoc = getScoringLocation(field, robot.team);
             if (scoreLoc) {
                 return getPathTarget(field, robot, { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 });
@@ -37,14 +38,17 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
         );
 
         if (deepBall) {
+            this.status = "Hunting deep balls";
             return getPathTarget(field, robot, deepBall);
         }
 
         const { ball: anyBall } = findBestEVBall(field, robot, robot, EV_SCORED);
         if (anyBall) {
+            this.status = "Scanning for targets";
             return getPathTarget(field, robot, anyBall);
         }
 
+        this.status = "Patrolling field";
         return null;
     }
 
