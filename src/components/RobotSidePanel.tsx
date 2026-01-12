@@ -11,7 +11,7 @@ export const RobotSidePanel: React.FC<RobotSidePanelProps> = ({ engine }) => {
             style={{
                 padding: "15px",
                 borderLeft: "1px solid #eee",
-                width: "280px",
+                width: "100%",
                 height: "100%",
                 overflowY: "auto",
                 background: "rgba(255, 255, 255, 0.5)",

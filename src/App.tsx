@@ -8,10 +8,14 @@ import { RobotSidePanel } from "./components/RobotSidePanel";
 import { StrategyManager } from "./components/StrategyManager";
 
 function App() {
-  const engineRef = useRef<Engine>(new Engine());
+  const [engine] = useState(() => new Engine());
+  const engineRef = useRef<Engine>(engine);
   const [, setTick] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
+
+  const [leftOpen, setLeftOpen] = useState(true);
+  const [rightOpen, setRightOpen] = useState(true);
 
   const forceUpdate = useCallback(() => {
     setTick((t) => t + 1);
@@ -60,16 +64,51 @@ function App() {
       width: "100vw",
       overflow: "hidden",
       backgroundColor: "#f0f2f5",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+      fontFamily: "'Outfit', sans-serif"
     }}>
-      {/* Left Sidebar: Game Log - Full Height */}
-      <GameLog results={gameResults} onReset={clearLog} />
+      {/* Left Sidebar: Game Log */}
+      <div style={{
+        width: leftOpen ? "320px" : "0px",
+        height: "100%",
+        transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        position: "relative",
+        overflow: "visible",
+        flexShrink: 0,
+        backgroundColor: "#fff",
+        borderRight: leftOpen ? "1px solid #eee" : "none"
+      }}>
+        <div style={{
+          width: "320px",
+          height: "100%",
+          opacity: leftOpen ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out",
+          pointerEvents: leftOpen ? "auto" : "none"
+        }}>
+          <GameLog results={gameResults} onReset={clearLog} />
+        </div>
+        <button
+          onClick={() => setLeftOpen(!leftOpen)}
+          className={`side-panel-toggle ${!leftOpen ? "closed" : ""}`}
+          style={{
+            position: "absolute",
+            left: "100%",
+            top: "10px",
+            zIndex: 100,
+            borderLeft: "none",
+            borderRadius: "0 4px 4px 0"
+          }}
+          title={leftOpen ? "Collapse Log" : "Expand Log"}
+        >
+          {leftOpen ? "←" : "→"}
+        </button>
+      </div>
 
       <div style={{
         display: "flex",
         flexDirection: "column",
         flex: 1,
-        overflow: "hidden"
+        overflow: "hidden",
+        position: "relative"
       }}>
         <main style={{
           flex: 1,
@@ -81,12 +120,15 @@ function App() {
           backgroundColor: "#fff"
         }}>
           <div style={{
-            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-            borderRadius: "12px",
+            boxShadow: `0 10px 40px ${engineRef.current.currentScoringTeam === "RED" ? "rgba(255, 77, 79, 0.2)" : "rgba(24, 144, 255, 0.2)"}`,
+            borderRadius: "16px",
             overflow: "hidden",
             background: "#000",
-            padding: "10px",
-            flexShrink: 0
+            padding: "8px",
+            flexShrink: 0,
+            border: `4px solid ${engineRef.current.currentScoringTeam === "RED" ? "#ff4d4f" : "#1890ff"}`,
+            transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+            transform: "translateZ(0)"
           }}>
             <FieldView engine={engineRef.current} />
           </div>
@@ -106,8 +148,42 @@ function App() {
         </main>
       </div>
 
-      {/* Right Sidebar: Robot Info - Full Height */}
-      <RobotSidePanel engine={engineRef.current} />
+      {/* Right Sidebar: Robot Info */}
+      <div style={{
+        width: rightOpen ? "320px" : "0px",
+        height: "100%",
+        transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        position: "relative",
+        overflow: "visible",
+        flexShrink: 0,
+        backgroundColor: "#fff",
+        borderLeft: rightOpen ? "1px solid #eee" : "none"
+      }}>
+        <div style={{
+          width: "320px",
+          height: "100%",
+          opacity: rightOpen ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out",
+          pointerEvents: rightOpen ? "auto" : "none"
+        }}>
+          <RobotSidePanel engine={engineRef.current} />
+        </div>
+        <button
+          onClick={() => setRightOpen(!rightOpen)}
+          className={`side-panel-toggle ${!rightOpen ? "closed" : ""}`}
+          style={{
+            position: "absolute",
+            right: "100%",
+            top: "10px",
+            zIndex: 100,
+            borderRight: "none",
+            borderRadius: "4px 0 0 4px"
+          }}
+          title={rightOpen ? "Collapse Intelligence" : "Expand Intelligence"}
+        >
+          {rightOpen ? "→" : "←"}
+        </button>
+      </div>
     </div>
   );
 }
