@@ -32,14 +32,17 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist <= robot.maxShootDistance * 0.9) {
+                        this.status = "Aiming for goal";
                         return null;
                     }
 
+                    this.status = "Positioning for shot";
                     return getPathTarget(field, robot, {
                         x: scoreLoc.x + 0.5,
                         y: scoreLoc.y + 0.5,
                     });
                 } else {
+                    this.status = "Returning to home zone";
                     // If somehow outside, rush back
                     const safeZoneX =
                         robot.team === "RED"
@@ -60,10 +63,12 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
         );
 
         if (bestBall) {
+            this.status = "Collecting in zone";
             return getPathTarget(field, robot, bestBall);
         }
 
         // Default: Return to center of home zone if idle
+        this.status = "Waiting for balls";
         const homeCenterX = robot.team === "RED" ? FIELD_WIDTH * 0.15 : FIELD_WIDTH * 0.85;
         return getPathTarget(field, robot, { x: homeCenterX, y: FIELD_HEIGHT / 2 });
     }

@@ -21,6 +21,7 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
         if (robot.ballCount > 0) {
             // If in home zone, go score
             if (isInTeamZone(robot.x, robot.team)) {
+                this.status = "Moving to score";
                 const scoreLoc = getScoringLocation(field, robot.team);
                 if (scoreLoc) {
                     return getPathTarget(field, robot, { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 });
@@ -30,6 +31,7 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
             // If in neutral/opponent zone, move to staging area or boundary
             const stagingLoc = getStagingLocation(field, robot.team);
             if (stagingLoc) {
+                this.status = "Moving to staging";
                 return getPathTarget(field, robot, {
                     x: stagingLoc.x + 0.5,
                     y: stagingLoc.y + 0.5,
@@ -42,8 +44,10 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
 
         const { ball: bestBall } = findBestEVBall(field, robot, targetPos, EV_SCORED);
         if (bestBall) {
+            this.status = "Collecting high-value balls";
             return getPathTarget(field, robot, bestBall);
         }
+        this.status = "Awaiting targets";
         return null;
     }
 
