@@ -336,13 +336,13 @@ export function calculateHeading(
   return Math.atan2(to.y - from.y, to.x - from.x);
 }
 
-export function isInTeamZone(x: number, team: Team): boolean {
+export function isInTeamZone(x: number, team: Team, field?: Field): boolean {
   if (team === TEAM_RED) {
-    // Red zone is strictly left of the red boundary wall
-    return x < Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT);
+    const boundary = field ? field.leftBoundaryX : Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT);
+    return x < boundary;
   } else {
-    // Blue zone is strictly right of the blue boundary wall
-    return x >= Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1;
+    const boundary = field ? field.rightBoundaryX : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT);
+    return x >= boundary + 1;
   }
 }
 

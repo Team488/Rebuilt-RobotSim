@@ -37,6 +37,9 @@ export class Field {
   flyingBalls: FlyingBall[] = [];
   engine?: EngineInterface;
 
+  readonly leftBoundaryX: number;
+  readonly rightBoundaryX: number;
+
   constructor(
     width: number = FIELD_WIDTH,
     height: number = FIELD_HEIGHT,
@@ -44,8 +47,28 @@ export class Field {
   ) {
     this.width = width;
     this.height = height;
+    this.leftBoundaryX = Math.floor(width * ZONE_RATIO_LEFT);
+    this.rightBoundaryX = Math.floor(width * ZONE_RATIO_RIGHT);
     this.grid = this.initializeGrid(numBalls);
     this.scoringLocations = this.initializeScoringLocations();
+  }
+
+  isValidTile(r: number, c: number): boolean {
+    return r >= 0 && r < this.height && c >= 0 && c < this.width;
+  }
+
+  isPassable(r: number, c: number): boolean {
+    return this.isValidTile(r, c) && this.grid[r][c] !== FieldTile.WALL;
+  }
+
+  setTileAt(x: number, y: number, tile: FieldTile): boolean {
+    const r = Math.floor(y);
+    const c = Math.floor(x);
+    if (this.isValidTile(r, c)) {
+      this.grid[r][c] = tile;
+      return true;
+    }
+    return false;
   }
 
   private initializeScoringLocations(): ScoringLocation[] {
@@ -106,8 +129,8 @@ export class Field {
     // 2. Add Team Boundary Borders (70% centered)
     // Red zone: x < width / 3
     // Blue zone: x >= 2 * width / 3
-    const leftBoundaryX = Math.floor(cols * ZONE_RATIO_LEFT);
-    const rightBoundaryX = Math.floor(cols * ZONE_RATIO_RIGHT);
+    const leftBoundaryX = this.leftBoundaryX;
+    const rightBoundaryX = this.rightBoundaryX;
 
     const innerHeight = rows - 2;
     const blockedRows = Math.round(BOUNDARY_WALL_HEIGHT_PERCENT * innerHeight);
@@ -125,11 +148,8 @@ export class Field {
 
   respawnBall() {
     // Collect all empty slots in the neutral zone
-    const leftBoundaryX = Math.floor(this.width * ZONE_RATIO_LEFT);
-    const rightBoundaryX = Math.floor(this.width * ZONE_RATIO_RIGHT);
-
-    const minX = leftBoundaryX + 1;
-    const maxX = rightBoundaryX - 1;
+    const minX = this.leftBoundaryX + 1;
+    const maxX = this.rightBoundaryX - 1;
 
     const openSlots: { r: number; c: number }[] = [];
 
@@ -153,11 +173,10 @@ export class Field {
     }
   }
 
-  // Helper to get tile at coordinates (flooring)
   getTileAt(x: number, y: number): FieldTile {
     const r = Math.floor(y);
     const c = Math.floor(x);
-    if (r >= 0 && r < this.grid.length && c >= 0 && c < this.grid[0].length) {
+    if (this.isValidTile(r, c)) {
       return this.grid[r][c];
     }
     return FieldTile.WALL;
@@ -197,7 +216,7 @@ export class Field {
       const { r, c } = queue.shift()!;
 
       // Check bounds
-      if (r >= 0 && r < this.grid.length && c >= 0 && c < this.grid[0].length) {
+      if (this.isValidTile(r, c)) {
         const isScoringLocation = this.getScoringLocationAt(c, r);
 
         if (this.grid[r][c] === FieldTile.EMPTY && !isScoringLocation) {

@@ -1,4 +1,5 @@
-export const TICK_RATE = 20; // Ticks per second
+export const BASE_TICK_RATE = 20; // Ticks per second
+export const SECONDS_PER_TICK = 1 / BASE_TICK_RATE;
 export const GAME_DURATION = 220; // Seconds
 
 // Field Dimensions and Layout
@@ -15,8 +16,8 @@ export const ZONE_RATIO_LEFT = 1 / 3;
 export const ZONE_RATIO_RIGHT = 2 / 3;
 export const BOUNDARY_WALL_HEIGHT_PERCENT = 0.7;
 
-export const SCORING_INTERVAL = 300;
-export const BALL_SPEED = 15;
+export const SCORING_INTERVAL = 20 * BASE_TICK_RATE; // Seconds
+export const BALL_SPEED = 1 / 20 * BASE_TICK_RATE; // Units per tick (15 m/s at 20Hz)
 export const ROBOTS_PER_TEAM = 3;
 
 export const FieldTile = {

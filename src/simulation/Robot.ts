@@ -1,4 +1,5 @@
 import { Field } from "./Field";
+import { BASE_TICK_RATE } from "./GameConst";
 import type { Team } from "./GameConst";
 
 export type Action =
@@ -38,10 +39,10 @@ export class Robot {
   y: number;
   team: Team;
   ballCount: number = 0;
-  maxBalls: number = 3;
-  moveSpeed: number = 10;
+  maxBalls: number = 5;
+  moveSpeed: number = 0.5 * BASE_TICK_RATE;
   shotCooldown: number = 0;
-  baseShotCooldown: number = 5;
+  baseShotCooldown: number = 1 / 4 * BASE_TICK_RATE;
   maxShootDistance: number = 100;
   accuracyMin: number = 0.3;
   accuracyMax: number = 0.9;
@@ -76,7 +77,7 @@ export class Robot {
       : this.collectionStrategy;
   }
 
-  move(field: Field, dt: number) {
+  move(field: Field) {
     const moveTarget = this.currentStrategy.decideMove(this, field);
     if (moveTarget) {
       const dx = moveTarget.x - this.x;
@@ -84,7 +85,7 @@ export class Robot {
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist > 0.1) {
-        const step = this.moveSpeed * dt;
+        const step = this.moveSpeed;
         this.x += (dx / dist) * Math.min(step, dist);
         this.y += (dy / dist) * Math.min(step, dist);
       }

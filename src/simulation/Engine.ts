@@ -3,7 +3,8 @@ import { Robot } from "./Robot";
 import { BasicScoringStrategy } from "./strategies/BasicScoringStrategy";
 import { BasicCollectorStrategy } from "./strategies/BasicCollectorStrategy";
 import {
-  TICK_RATE,
+  BASE_TICK_RATE,
+  SECONDS_PER_TICK,
   GAME_DURATION,
   TEAM_RED,
   TEAM_BLUE,
@@ -89,7 +90,7 @@ export class Engine {
       const id = `${team === TEAM_RED ? "R" : "B"}${i + 1}`;
 
       // Create robot with default strategies and default values from Robot class
-      // Note: Robot class defaults (moveSpeed=10, maxBalls=3, etc.) will be used
+      // Note: Robot class defaults (moveSpeed=0.5, maxBalls=3, etc.) will be used
       const robot = new Robot(
         id,
         startX,
@@ -124,8 +125,7 @@ export class Engine {
           );
           if (InactiveClass) robot.collectionStrategy = new InactiveClass();
 
-          if (config.moveSpeed !== undefined)
-            robot.moveSpeed = config.moveSpeed;
+          if (config.moveSpeed !== undefined) robot.moveSpeed = config.moveSpeed;
           if (config.maxBalls !== undefined) robot.maxBalls = config.maxBalls;
           if (config.baseShotCooldown !== undefined)
             robot.baseShotCooldown = config.baseShotCooldown;
@@ -277,9 +277,26 @@ export class Engine {
   start() {
     if (this.isRunning) return;
     this.isRunning = true;
+
+    // We'll use a fixed interval of 10ms for smooth simulation scaling
+    // and run multiple ticks if needed.
+    let lastTime = performance.now();
+    let accumulator = 0;
+
     this.intervalId = window.setInterval(() => {
-      this.tick();
-    }, 1000 / TICK_RATE);
+      const now = performance.now();
+      const dtReal = (now - lastTime) / 1000;
+      lastTime = now;
+
+      // The user wants ticks per second to scale with playbackSpeed.
+      // So target ticks per real-second is BASE_TICK_RATE * playbackSpeed.
+      accumulator += dtReal * (BASE_TICK_RATE * this.playbackSpeed);
+
+      while (accumulator >= 1 && this.isRunning) {
+        this.tick();
+        accumulator -= 1;
+      }
+    }, 10);
   }
 
   stop() {
@@ -297,6 +314,7 @@ export class Engine {
   }
 
   tick() {
+    if (!this.isRunning) return;
     if (this.time >= GAME_DURATION) {
       this.stop();
       if (this.onGameEnd) {
@@ -316,10 +334,10 @@ export class Engine {
       return;
     }
 
-    const dt = (1.0 / TICK_RATE) * this.playbackSpeed;
     if (this.time === 0) console.log("Engine Tick Started");
-    this.time += dt;
-    this.modeTimer += this.playbackSpeed;
+
+    this.time += SECONDS_PER_TICK;
+    this.modeTimer++;
 
     // Switch modes
     if (this.modeTimer >= SCORING_INTERVAL) {
@@ -335,12 +353,13 @@ export class Engine {
       const ball = this.field.flyingBalls[i];
 
       // Move ball
-      const dist = Math.sqrt(
-        Math.pow(ball.targetX - ball.x, 2) + Math.pow(ball.targetY - ball.y, 2),
-      );
-      const step = ball.speed * dt;
+      const dx = ball.targetX - ball.x;
+      const dy = ball.targetY - ball.y;
+      const distSq = dx * dx + dy * dy;
+      const step = ball.speed;
+      const stepSq = step * step;
 
-      if (step >= dist) {
+      if (stepSq >= distSq) {
         // Landed
         ball.x = ball.targetX;
         ball.y = ball.targetY;
@@ -351,7 +370,7 @@ export class Engine {
 
         if (scoringLoc) {
           // Check if shot originated from team's zone
-          const validOrigin = isInTeamZone(ball.originX, scoringLoc.team);
+          const validOrigin = isInTeamZone(ball.originX, scoringLoc.team, this.field);
 
           if (scoringLoc.active && validOrigin) {
             // SCORING LOGIC
@@ -377,20 +396,8 @@ export class Engine {
           }
         } else {
           // Check if landing on empty tile logic
-          const tile = this.field.getTileAt(ball.x, ball.y);
-          if (tile === FieldTile.EMPTY) {
-            // Place it here
-            const r = Math.floor(ball.y);
-            const c = Math.floor(ball.x);
-            if (
-              r >= 0 &&
-              r < this.field.grid.length &&
-              c >= 0 &&
-              c < this.field.grid[0].length
-            ) {
-              this.field.grid[r][c] = FieldTile.BALL;
-              placed = true;
-            }
+          if (this.field.getTileAt(ball.x, ball.y) === FieldTile.EMPTY) {
+            placed = this.field.setTileAt(ball.x, ball.y, FieldTile.BALL);
           }
         }
 
@@ -399,16 +406,7 @@ export class Engine {
           // Find nearest open square.
           const landingNode = this.field.findNearestOpenNode(ball.x, ball.y);
           if (landingNode) {
-            const r = Math.floor(landingNode.y);
-            const c = Math.floor(landingNode.x);
-            if (
-              r >= 0 &&
-              r < this.field.grid.length &&
-              c >= 0 &&
-              c < this.field.grid[0].length
-            ) {
-              this.field.grid[r][c] = FieldTile.BALL;
-            }
+            this.field.setTileAt(landingNode.x, landingNode.y, FieldTile.BALL);
           }
           // If no open node found, ball is lost/destroyed? Or piles up?
           // For now, if no open spot, it disappears.
@@ -417,38 +415,27 @@ export class Engine {
         this.field.flyingBalls.splice(i, 1);
       } else {
         // Move towards target
-        const angle = Math.atan2(ball.targetY - ball.y, ball.targetX - ball.x);
-        ball.x += Math.cos(angle) * step;
-        ball.y += Math.sin(angle) * step;
+        const dist = Math.sqrt(distSq);
+        ball.x += (dx / dist) * step;
+        ball.y += (dy / dist) * step;
       }
     }
 
     this.robots.forEach((robot) => {
       if (robot.shotCooldown > 0) robot.shotCooldown--;
-      robot.move(this.field, dt);
+      robot.move(this.field);
 
       // Robot Action Decision Phase
       const action = robot.currentStrategy.decideAction(robot, this.field);
 
       if (action?.type === "COLLECT") {
-        const r = Math.floor(robot.y);
-        const c = Math.floor(robot.x);
         if (
-          r >= 0 &&
-          r < this.field.grid.length &&
-          c >= 0 &&
-          c < this.field.grid[0].length
+          this.field.getTileAt(robot.x, robot.y) === FieldTile.BALL &&
+          robot.ballCount < robot.maxBalls
         ) {
-          if (
-            this.field.grid[r][c] === FieldTile.BALL &&
-            robot.ballCount < robot.maxBalls
-          ) {
-            this.field.grid[r][c] = FieldTile.EMPTY;
-            robot.ballCount++;
-            console.log(
-              `${robot.id} collected ball. Count: ${robot.ballCount}`,
-            );
-          }
+          this.field.setTileAt(robot.x, robot.y, FieldTile.EMPTY);
+          robot.ballCount++;
+          console.log(`${robot.id} collected ball. Count: ${robot.ballCount}`);
         }
       } else if (action?.type === "SHOOT") {
         if (robot.ballCount > 0 && robot.shotCooldown <= 0) {
@@ -458,77 +445,41 @@ export class Engine {
           const angle = action.angle;
 
           // Calculate Accuracy Percentage (Lerp)
-          const distRatio = Math.min(
-            Math.max(dist / robot.maxShootDistance, 0),
-            1,
-          );
-          const percentage =
-            robot.accuracyMax -
-            distRatio * (robot.accuracyMax - robot.accuracyMin);
+          const distRatio = Math.min(Math.max(dist / robot.maxShootDistance, 0), 1);
+          const percentage = robot.accuracyMax - distRatio * (robot.accuracyMax - robot.accuracyMin);
 
-          // Continuous spread based on accuracy (0 to 1)
-          const spreadScale = 2.0;
-          const spread = (1 - percentage) * spreadScale;
-
+          // Continuous spread based on accuracy
+          const spread = (1 - percentage) * 2.0;
           const rg1 = roughGaussian();
           const rg2 = roughGaussian();
 
-          const realTargetX = robot.x + Math.cos(angle) * dist + rg1 * spread;
-          const realTargetY = robot.y + Math.sin(angle) * dist + rg2 * spread;
+          let targetX = robot.x + Math.cos(angle) * dist + rg1 * spread;
+          let targetY = robot.y + Math.sin(angle) * dist + rg2 * spread;
 
-          if (isNaN(realTargetX) || isNaN(realTargetY)) {
-            console.error(
-              `Shooting Error: Invalid target. Defaulting to perfect shot.`,
-            );
-            // Fallback to perfect shot
-            const newBall = {
-              x: robot.x,
-              y: robot.y,
-              targetX: robot.x + Math.cos(angle) * dist,
-              targetY: robot.y + Math.sin(angle) * dist,
-              vx: Math.cos(angle) * BALL_SPEED,
-              vy: Math.sin(angle) * BALL_SPEED,
-              speed: BALL_SPEED,
-              id: `ball-${Date.now()}-${Math.random()}`,
-              originX: robot.x,
-              originY: robot.y,
-            };
-            this.field.flyingBalls.push(newBall);
-            robot.shotCooldown = robot.baseShotCooldown;
-          } else {
-            const newBall = {
-              x: robot.x,
-              y: robot.y,
-              targetX: realTargetX,
-              targetY: realTargetY,
-              vx: Math.cos(angle) * BALL_SPEED,
-              vy: Math.sin(angle) * BALL_SPEED,
-              speed: BALL_SPEED,
-              id: `ball-${Date.now()}-${Math.random()}`,
-              originX: robot.x,
-              originY: robot.y,
-            };
-
-            this.field.flyingBalls.push(newBall);
-
-            robot.shotCooldown = robot.baseShotCooldown;
-            console.log(
-              `${robot.id} SHOT ball with ${Math.round(percentage * 100)}% accuracy. Target: ${realTargetX.toFixed(1)}, ${realTargetY.toFixed(1)}`,
-            );
+          if (isNaN(targetX) || isNaN(targetY)) {
+            console.error(`Shooting Error: Invalid target. Defaulting to perfect shot.`);
+            targetX = robot.x + Math.cos(angle) * dist;
+            targetY = robot.y + Math.sin(angle) * dist;
           }
+
+          this.field.flyingBalls.push({
+            x: robot.x,
+            y: robot.y,
+            targetX,
+            targetY,
+            speed: BALL_SPEED,
+            id: `ball-${Date.now()}-${Math.random()}`,
+            originX: robot.x,
+            originY: robot.y,
+          });
+
+          robot.shotCooldown = robot.baseShotCooldown;
+          console.log(`${robot.id} SHOT ball with ${Math.round(percentage * 100)}% accuracy.`);
         }
       } else if (action?.type === "DROP") {
         if (robot.ballCount > 0) {
-          const r = Math.floor(robot.y);
-          const c = Math.floor(robot.x);
-          if (
-            r >= 0 &&
-            r < this.field.grid.length &&
-            c >= 0 &&
-            c < this.field.grid[0].length
-          ) {
-            if (this.field.grid[r][c] === FieldTile.EMPTY) {
-              this.field.grid[r][c] = FieldTile.BALL;
+          if (this.field.getTileAt(robot.x, robot.y) === FieldTile.EMPTY) {
+            if (this.field.setTileAt(robot.x, robot.y, FieldTile.BALL)) {
               robot.ballCount--;
               console.log(`${robot.id} dropped ball.`);
             }
