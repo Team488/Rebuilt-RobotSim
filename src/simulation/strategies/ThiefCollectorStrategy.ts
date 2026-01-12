@@ -14,6 +14,7 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
   name = "Opponent Thief";
   actionTime = 0.5;
   isDelivering = false;
+  patience = 0;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount >= robot.maxBalls) {
@@ -30,10 +31,16 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
       const nearestEmpty = findNearestEmptyTile(
         field,
         { x: goal.tileX, y: goal.tileY },
-        4,
+        6, // Wider search
         { x: goal.tileX, y: goal.tileY },
       );
-      if (nearestEmpty) return getPathTarget(field, robot, nearestEmpty);
+      if (nearestEmpty) {
+        const target = getPathTarget(field, robot, nearestEmpty);
+        if (target) {
+          this.patience = 0;
+          return target;
+        }
+      }
     }
 
     // Collection: Prioritize balls in OPPONENT zone
@@ -52,8 +59,12 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
     );
 
     if (opponentBall) {
-      this.status = "Infiltrating opponent territory";
-      return getPathTarget(field, robot, opponentBall);
+      const target = getPathTarget(field, robot, opponentBall);
+      if (target) {
+        this.patience = 0;
+        this.status = "Infiltrating opponent territory";
+        return target;
+      }
     }
 
     const { ball: anyBall } = findBestEVBall(
@@ -63,8 +74,24 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
       1.0,
     );
     if (anyBall) {
-      this.status = "Scavenging for any balls";
-      return getPathTarget(field, robot, anyBall);
+      const target = getPathTarget(field, robot, anyBall);
+      if (target) {
+        this.patience = 0;
+        this.status = "Scavenging for any balls";
+        return target;
+      }
+    }
+
+    // Unstick/Lurk logic
+    this.patience++;
+    if (this.patience > 10) {
+      this.status = "Lurking & repositioning";
+      if (this.patience > 40) this.patience = 0;
+      // Move towards a random spot in the midline
+      return getPathTarget(field, robot, {
+        x: FIELD_WIDTH / 2 + (Math.random() - 0.5) * 5,
+        y: robot.y + (Math.random() - 0.5) * 5,
+      });
     }
 
     this.status = "Lurking";

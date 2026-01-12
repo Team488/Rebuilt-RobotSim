@@ -14,6 +14,7 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
   name = "Staging Collector";
   actionTime = 0.6;
   isDelivering = false;
+  patience = 0;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount >= robot.maxBalls) {
@@ -31,10 +32,16 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
       const dropPos = findNearestEmptyTile(
         field,
         { x: stagingLoc.x, y: stagingLoc.y },
-        3,
-      ) ?? { x: stagingLoc.x + 0.5, y: stagingLoc.y + 0.5 };
+        5, // Wider search
+      );
 
-      return getPathTarget(field, robot, dropPos);
+      if (dropPos) {
+        const target = getPathTarget(field, robot, dropPos);
+        if (target) {
+          this.patience = 0;
+          return target;
+        }
+      }
     }
 
     const { ball } = findBestEVBall(
@@ -44,8 +51,23 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
       1.0,
     );
     if (ball) {
-      this.status = "Collecting for staging";
-      return getPathTarget(field, robot, ball);
+      const target = getPathTarget(field, robot, ball);
+      if (target) {
+        this.patience = 0;
+        this.status = "Collecting for staging";
+        return target;
+      }
+    }
+
+    // Unstick logic
+    this.patience++;
+    if (this.patience > 15) {
+      this.status = "Monitoring & repositioning";
+      if (this.patience > 30) this.patience = 0;
+      return {
+        x: robot.x + (Math.random() - 0.5) * 5,
+        y: robot.y + (Math.random() - 0.5) * 5,
+      };
     }
 
     this.status = "Monitoring field";

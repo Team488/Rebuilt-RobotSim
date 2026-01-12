@@ -13,6 +13,7 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
     name = "Bully Collector";
     actionTime = 0.5;
     isDelivering = false;
+    patience = 0;
 
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         if (robot.ballCount >= robot.maxBalls) {
@@ -29,10 +30,16 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
             const nearestEmpty = findNearestEmptyTile(
                 field,
                 { x: goal.tileX, y: goal.tileY },
-                5,
+                6, // Wider search
                 { x: goal.tileX, y: goal.tileY },
             );
-            if (nearestEmpty) return getPathTarget(field, robot, nearestEmpty);
+            if (nearestEmpty) {
+                const target = getPathTarget(field, robot, nearestEmpty);
+                if (target) {
+                    this.patience = 0;
+                    return target;
+                }
+            }
         }
 
         // Collection: Prioritize balls near opponent neutral zone
@@ -60,17 +67,24 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
         );
 
         if (targetBall) {
-            this.status = "Aggressive scavenging";
-            return getPathTarget(field, robot, targetBall);
+            const target = getPathTarget(field, robot, targetBall);
+            if (target) {
+                this.patience = 0;
+                this.status = "Aggressive scavenging";
+                return target;
+            }
         }
 
         // If no good balls, try to "shadow" or block the nearest opponent
         if (nearestOpponent) {
             this.status = `Bullying opponent`;
-            // Move towards opponent but stay slightly in front of them relative to ball cluster center or their goal
             const targetX = (robot.x + nearestOpponent.x) / 2;
             const targetY = (robot.y + nearestOpponent.y) / 2;
-            return getPathTarget(field, robot, { x: targetX, y: targetY });
+            const target = getPathTarget(field, robot, { x: targetX, y: targetY });
+            if (target) {
+                this.patience = 0;
+                return target;
+            }
         }
 
         const { ball: anyBall } = findBestEVBall(
@@ -80,8 +94,23 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
             1.0,
         );
         if (anyBall) {
-            this.status = "Collecting";
-            return getPathTarget(field, robot, anyBall);
+            const target = getPathTarget(field, robot, anyBall);
+            if (target) {
+                this.patience = 0;
+                this.status = "Collecting";
+                return target;
+            }
+        }
+
+        // Unstick logic
+        this.patience++;
+        if (this.patience > 10) {
+            this.status = "Hunting & repositioning";
+            if (this.patience > 30) this.patience = 0;
+            return {
+                x: robot.x + (Math.random() - 0.5) * 5,
+                y: robot.y + (Math.random() - 0.5) * 5,
+            };
         }
 
         this.status = "Hunting";

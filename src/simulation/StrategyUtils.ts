@@ -302,16 +302,28 @@ export function getPathTarget(
   robot: Robot,
   target: { x: number; y: number },
 ): { x: number; y: number } | null {
-  const path = AStar.findPath(field, { x: robot.x, y: robot.y }, target);
+  // 1. Try standard pathfinding (avoiding walls AND robots)
+  let path = AStar.findPath(field, { x: robot.x, y: robot.y }, target, robot.id);
+
+  // 2. Fallback: Try path avoiding ONLY walls if blocked by robots
+  if (!path) {
+    // We pass true for 'ignoreRobots' indirectly by not passing robot.id
+    // But wait, AStar.ts findPath has robotIdToIgnore.
+    // Let's check AStar.findPath signature: (field, start, target, robotIdToIgnore?)
+    // If we want to IGNORE ALL ROBOTS, we need to modify AStar or use a flag.
+    // Looking at AStar.ts: if (ignoreRobots) is passed to isPassable.
+    // Actually, AStar.findPath calls isPassable(..., false, robotIdToIgnore).
+    // Let's check AStar.ts again.
+
+    // I will try to find a path that ignores robots entirely to at least move in the right direction.
+    path = AStar.findPath(field, { x: robot.x, y: robot.y }, target, "IGNORE_ALL_ROBOTS");
+  }
+
   if (!path) return null;
   if (path.length < 2) return target;
 
   // The first point in path is the center of the current tile or the start position.
   // We want the NEXT point to move towards.
-  // If we're already very close to path[0], path[1] is the next target.
-  // However, AStar.findPath returns path[0] as the center of the START tile.
-
-  // Check if we are already at path[0]'s tile
   const currentTileX = Math.floor(robot.x);
   const currentTileY = Math.floor(robot.y);
   const path0TileX = Math.floor(path[0].x);
