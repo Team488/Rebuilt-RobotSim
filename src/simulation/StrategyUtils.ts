@@ -320,6 +320,13 @@ export function getPathTarget(
   return path[0];
 }
 
+export function calculateHeading(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+): number {
+  return Math.atan2(to.y - from.y, to.x - from.x);
+}
+
 export function isInTeamZone(x: number, team: Team): boolean {
   if (team === TEAM_RED) {
     return x < FIELD_WIDTH / 3;
