@@ -14,7 +14,6 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
   // Field is 100x60. Let's aim for ~1200px width. 1200/100 = 12.
   const SCALE = 12;
 
-
   useEffect(() => {
     const render = () => {
       const canvas = canvasRef.current;
@@ -166,7 +165,6 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
           ctx.fillText(robot.ballCount.toString(), x, y + 3);
         }
       });
-
     };
 
     render();

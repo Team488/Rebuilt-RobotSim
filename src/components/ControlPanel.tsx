@@ -43,14 +43,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   return (
     <div className="control-panel-container">
       <div className="score-display">
-        <div className="score-item red-score">
-          Red: {engine.scoreRed}
-        </div>
-        <div className="score-item blue-score">
-          Blue: {engine.scoreBlue}
-        </div>
+        <div className="score-item red-score">Red: {engine.scoreRed}</div>
+        <div className="score-item blue-score">Blue: {engine.scoreBlue}</div>
         <div className="score-item time">Time: {engine.time.toFixed(1)}s</div>
-        <div className={`score-item mode-status ${engine.currentScoringTeam === "RED" ? "red" : "blue"}`}>
+        <div
+          className={`score-item mode-status ${engine.currentScoringTeam === "RED" ? "red" : "blue"}`}
+        >
           {engine.currentScoringTeam === "RED" ? "🔴 RED" : "🔵 BLUE"} SCORING
         </div>
       </div>
@@ -68,12 +66,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               Restart
             </button>
           ) : !isRunning ? (
-            <button className="primary-button" onClick={onStart}>Start Simulation</button>
+            <button className="primary-button" onClick={onStart}>
+              Start Simulation
+            </button>
           ) : (
-            <button className="secondary-button" onClick={onStop}>Pause</button>
+            <button className="secondary-button" onClick={onStop}>
+              Pause
+            </button>
           )}
           {!isFinished && (
-            <button className="reset-button" onClick={onReset}>Reset</button>
+            <button className="reset-button" onClick={onReset}>
+              Reset
+            </button>
           )}
         </div>
 
@@ -91,18 +95,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             >
               {"<<"}
             </button>
-            <button
-              onClick={handleSlower}
-              title="Slower"
-              className="speed-btn"
-            >
+            <button onClick={handleSlower} title="Slower" className="speed-btn">
               {"<"}
             </button>
-            <button
-              onClick={handleFaster}
-              title="Faster"
-              className="speed-btn"
-            >
+            <button onClick={handleFaster} title="Faster" className="speed-btn">
               {">"}
             </button>
             <button

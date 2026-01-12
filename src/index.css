@@ -1,5 +1,5 @@
 :root {
-  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  font-family: "Outfit", "Inter", system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light;
@@ -98,7 +98,9 @@ h4 {
 
 .sidebar {
   height: 100%;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
+  transition:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s ease;
   position: relative;
   overflow: visible;
   flex-shrink: 0;
@@ -199,7 +201,7 @@ h4 {
 
   /* When sidebars are open on mobile, maybe dim the main content */
   .app-container.sidebar-open::after {
-    content: '';
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
@@ -405,7 +407,9 @@ h4 {
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
   background: linear-gradient(135deg, #fff 0%, #fcfcfc 100%);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .robot-card:hover {
@@ -576,7 +580,7 @@ h4 {
 }
 
 .scores {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   font-weight: 700;
 }
 
@@ -709,7 +713,7 @@ h4 {
 .robot-pos {
   font-size: 12px;
   color: #8c8c8c;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .robot-status-banner {

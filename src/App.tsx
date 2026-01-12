@@ -40,8 +40,8 @@ function App() {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -81,28 +81,33 @@ function App() {
   };
 
   return (
-    <div className={`app-container ${(leftOpen || rightOpen) ? "sidebar-open" : ""}`}>
+    <div
+      className={`app-container ${leftOpen || rightOpen ? "sidebar-open" : ""}`}
+    >
       {/* Mobile Overlay */}
       {(leftOpen || rightOpen) && window.innerWidth <= 1024 && (
         <div
           className="mobile-overlay-actual"
           onClick={closeSidebars}
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
             zIndex: 45,
-            background: 'transparent'
+            background: "transparent",
           }}
         />
       )}
 
       {/* Left Sidebar: Game Log */}
-      <div className={`sidebar left-sidebar ${!leftOpen ? "closed-mobile" : ""}`} style={{
-        width: leftOpen ? "320px" : "0px",
-      }}>
+      <div
+        className={`sidebar left-sidebar ${!leftOpen ? "closed-mobile" : ""}`}
+        style={{
+          width: leftOpen ? "320px" : "0px",
+        }}
+      >
         <div className="sidebar-content" style={{ opacity: leftOpen ? 1 : 0 }}>
           <GameLog results={gameResults} onReset={clearLog} />
         </div>
@@ -115,7 +120,7 @@ function App() {
             top: "10px",
             zIndex: 100,
             borderLeft: "none",
-            borderRadius: "0 4px 4px 0"
+            borderRadius: "0 4px 4px 0",
           }}
           title={leftOpen ? "Collapse Log" : "Expand Log"}
         >
@@ -125,10 +130,13 @@ function App() {
 
       <div className="main-content">
         <main className="main-scroll-area">
-          <div className="field-container" style={{
-            boxShadow: `0 10px 40px ${engineRef.current.currentScoringTeam === "RED" ? "rgba(255, 77, 79, 0.2)" : "rgba(24, 144, 255, 0.2)"}`,
-            border: `4px solid ${engineRef.current.currentScoringTeam === "RED" ? "#ff4d4f" : "#1890ff"}`,
-          }}>
+          <div
+            className="field-container"
+            style={{
+              boxShadow: `0 10px 40px ${engineRef.current.currentScoringTeam === "RED" ? "rgba(255, 77, 79, 0.2)" : "rgba(24, 144, 255, 0.2)"}`,
+              border: `4px solid ${engineRef.current.currentScoringTeam === "RED" ? "#ff4d4f" : "#1890ff"}`,
+            }}
+          >
             <FieldView engine={engineRef.current} />
           </div>
 
@@ -142,15 +150,21 @@ function App() {
           />
 
           <div className="strategy-manager-container">
-            <StrategyManager engine={engineRef.current} onUpdate={forceUpdate} />
+            <StrategyManager
+              engine={engineRef.current}
+              onUpdate={forceUpdate}
+            />
           </div>
         </main>
       </div>
 
       {/* Right Sidebar: Robot Info */}
-      <div className={`sidebar right-sidebar ${!rightOpen ? "closed-mobile" : ""}`} style={{
-        width: rightOpen ? "320px" : "0px",
-      }}>
+      <div
+        className={`sidebar right-sidebar ${!rightOpen ? "closed-mobile" : ""}`}
+        style={{
+          width: rightOpen ? "320px" : "0px",
+        }}
+      >
         <div className="sidebar-content" style={{ opacity: rightOpen ? 1 : 0 }}>
           <RobotSidePanel engine={engineRef.current} />
         </div>
@@ -163,7 +177,7 @@ function App() {
             top: "10px",
             zIndex: 100,
             borderRight: "none",
-            borderRadius: "4px 0 0 4px"
+            borderRadius: "4px 0 0 4px",
           }}
           title={rightOpen ? "Collapse Intelligence" : "Expand Intelligence"}
         >
@@ -178,7 +192,10 @@ function App() {
             setLeftOpen(!leftOpen);
             setRightOpen(false);
           }}
-          style={{ backgroundColor: leftOpen ? "#333" : "#fff", color: leftOpen ? "#fff" : "#333" }}
+          style={{
+            backgroundColor: leftOpen ? "#333" : "#fff",
+            color: leftOpen ? "#fff" : "#333",
+          }}
         >
           Log {leftOpen ? "×" : "≡"}
         </button>
@@ -187,7 +204,10 @@ function App() {
             setRightOpen(!rightOpen);
             setLeftOpen(false);
           }}
-          style={{ backgroundColor: rightOpen ? "#333" : "#fff", color: rightOpen ? "#fff" : "#333" }}
+          style={{
+            backgroundColor: rightOpen ? "#333" : "#fff",
+            color: rightOpen ? "#fff" : "#333",
+          }}
         >
           Intell {rightOpen ? "×" : "≡"}
         </button>
