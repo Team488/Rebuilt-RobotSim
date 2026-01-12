@@ -4,6 +4,7 @@ import { Field } from "../Field";
 import { FieldTile } from "../GameConst";
 import {
   findBestEVBall,
+  findNearestEmptyTile,
   getPathTarget,
   getStagingLocation,
 } from "../StrategyUtils";
@@ -26,10 +27,14 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
 
     if (this.isDelivering) {
       this.status = "Moving to staging area";
-      return getPathTarget(field, robot, {
-        x: stagingLoc.x + 0.5,
-        y: stagingLoc.y + 0.5,
-      });
+      // Find nearest empty tile AROUND staging location to avoid getting stuck
+      const dropPos = findNearestEmptyTile(
+        field,
+        { x: stagingLoc.x, y: stagingLoc.y },
+        3,
+      ) ?? { x: stagingLoc.x + 0.5, y: stagingLoc.y + 0.5 };
+
+      return getPathTarget(field, robot, dropPos);
     }
 
     const { ball } = findBestEVBall(
@@ -59,18 +64,21 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         // If close to staging or IN range to shoot it there
-        if (dist <= robot.maxShootDistance && dist > 1.5) {
-          return {
-            type: "SHOOT",
-            distance: dist,
-            angle: Math.atan2(
-              stagingLoc.y + 0.5 - robot.y,
-              stagingLoc.x + 0.5 - robot.x,
-            ),
-          };
+        if (dist <= robot.maxShootDistance && dist > 2.0) {
+          // Check if the target tile is actually empty before shooting
+          if (field.getTileAt(stagingLoc.x + 0.5, stagingLoc.y + 0.5) === FieldTile.EMPTY) {
+            return {
+              type: "SHOOT",
+              distance: dist,
+              angle: Math.atan2(
+                stagingLoc.y + 0.5 - robot.y,
+                stagingLoc.x + 0.5 - robot.x,
+              ),
+            };
+          }
         }
 
-        if (dist <= 1.5 && field.grid[r][c] === FieldTile.EMPTY) {
+        if (dist <= 2.5 && field.grid[r][c] === FieldTile.EMPTY) {
           return { type: "DROP" };
         }
       }
