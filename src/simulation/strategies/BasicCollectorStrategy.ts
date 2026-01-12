@@ -15,6 +15,7 @@ export class BasicCollectorStrategy extends InactiveScoringStrategy {
   actionTime = 0.5; // Fast pickup
   isDelivering = false;
   lastDropLocation: { x: number; y: number } | null = null;
+  patience = 0;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     // Target the Goal directly for maximum efficiency
@@ -35,15 +36,19 @@ export class BasicCollectorStrategy extends InactiveScoringStrategy {
     if (this.isDelivering && robot.ballCount > 0) {
       this.status = `Delivering ${robot.ballCount} balls`;
       // Find the NEAREST empty tile to the scoring location
-      // Radius 4 covers the area around the goal without searching the whole field
+      // Increased radius to 6 to find a spot even if crowded
       const nearestEmpty = findNearestEmptyTile(
         field,
         { x: goal.tileX, y: goal.tileY },
-        4,
+        6,
         { x: goal.tileX, y: goal.tileY }, // Exclude the goal tile itself
       );
       if (nearestEmpty) {
-        return getPathTarget(field, robot, nearestEmpty);
+        const nextTarget = getPathTarget(field, robot, nearestEmpty);
+        if (nextTarget) {
+          this.patience = 0;
+          return nextTarget;
+        }
       }
     }
 
@@ -56,17 +61,34 @@ export class BasicCollectorStrategy extends InactiveScoringStrategy {
         goalPos,
         goalEV,
         (r, c) =>
-          !this.lastDropLocation ||
-          c !== this.lastDropLocation.x ||
-          r !== this.lastDropLocation.y,
+          (!this.lastDropLocation ||
+            c !== this.lastDropLocation.x ||
+            r !== this.lastDropLocation.y) &&
+          // Avoid balls very close to robots that might be "contested" or blocked
+          true,
       );
 
       if (ball) {
-        return getPathTarget(field, robot, ball);
+        const nextTarget = getPathTarget(field, robot, ball);
+        if (nextTarget) {
+          this.patience = 0;
+          return nextTarget;
+        }
       }
     }
 
-    this.status = "Idle";
+    // Unstick logic: move randomly if idle/stuck
+    this.patience++;
+    if (this.patience > 15) {
+      this.status = "Unsticking... moving randomly";
+      if (this.patience > 30) this.patience = 0;
+      return {
+        x: robot.x + (Math.random() - 0.5) * 4,
+        y: robot.y + (Math.random() - 0.5) * 4,
+      };
+    }
+
+    this.status = "Waiting for path";
     return null;
   }
 
