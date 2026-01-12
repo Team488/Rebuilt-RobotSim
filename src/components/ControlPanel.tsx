@@ -31,12 +31,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const handleFaster = () => {
-    engine.playbackSpeed = Math.min(5, engine.playbackSpeed + 0.1);
+    engine.playbackSpeed = Math.min(3, engine.playbackSpeed + 0.1);
     onUpdate();
   };
 
   const handleMuchFaster = () => {
-    engine.playbackSpeed = Math.min(5, engine.playbackSpeed + 1.0);
+    engine.playbackSpeed = Math.min(3, engine.playbackSpeed + 1.0);
     onUpdate();
   };
 
