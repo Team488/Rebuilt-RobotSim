@@ -12,10 +12,15 @@ import {
   ROBOTS_PER_TEAM,
   BALL_SPEED,
   FieldTile,
-  SHOT_COOLDOWN_TICKS,
 } from "./GameConst";
 import type { Team } from "./GameConst";
 import { isInTeamZone } from "./StrategyUtils";
+
+export interface GameResult {
+  winner: Team | "TIE";
+  scoreRed: number;
+  scoreBlue: number;
+}
 
 export class Engine {
   field: Field;
@@ -23,7 +28,9 @@ export class Engine {
   time: number = 0;
   isRunning: boolean = false;
   intervalId: number | null = null;
+  playbackSpeed: number = 1.0;
   onTick: ((engine: Engine) => void) | null = null;
+  onGameEnd: ((result: GameResult) => void) | null = null;
 
   scoreRed: number = 0;
   scoreBlue: number = 0;
@@ -96,13 +103,26 @@ export class Engine {
   tick() {
     if (this.time >= GAME_DURATION) {
       this.stop();
+      if (this.onGameEnd) {
+        const winner =
+          this.scoreRed > this.scoreBlue
+            ? TEAM_RED
+            : this.scoreBlue > this.scoreRed
+              ? TEAM_BLUE
+              : "TIE";
+        this.onGameEnd({
+          winner,
+          scoreRed: this.scoreRed,
+          scoreBlue: this.scoreBlue,
+        });
+      }
       if (this.onTick) this.onTick(this); // Update one last time
       return;
     }
 
-    const dt = 1.0 / TICK_RATE;
+    const dt = (1.0 / TICK_RATE) * this.playbackSpeed;
     this.time += dt;
-    this.modeTimer++;
+    this.modeTimer += this.playbackSpeed;
 
     // Switch modes
     if (this.modeTimer >= SCORING_INTERVAL) {
@@ -288,7 +308,7 @@ export class Engine {
             originY: robot.y,
           });
 
-          robot.shotCooldown = SHOT_COOLDOWN_TICKS;
+          robot.shotCooldown = robot.baseShotCooldown;
           console.log(`${robot.id} SHOT ball.`);
         }
       } else if (action?.type === "DROP") {

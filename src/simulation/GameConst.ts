@@ -32,7 +32,6 @@ export type Team = typeof TEAM_RED | typeof TEAM_BLUE;
 export const SCORING_INTERVAL = 300; // Ticks before switching scoring/collecting focus
 export const BALL_SPEED = 15; // Meters per second
 export const ROBOTS_PER_TEAM = 3;
-export const SHOT_COOLDOWN_TICKS = 40; // 2 seconds between shots
 
 export const FieldTile = {
   EMPTY: 0,

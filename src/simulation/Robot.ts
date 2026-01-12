@@ -21,7 +21,9 @@ export class Robot {
   team: Team;
   ballCount: number = 0;
   maxBalls: number = 3;
+  moveSpeed: number = 3.5; // Meters per second
   shotCooldown: number = 0;
+  baseShotCooldown: number = 5; // Default ticks between shots
   maxShootDistance: number = 10; // Default max shoot distance
 
   scoringStrategy: RobotStrategy;
@@ -62,7 +64,7 @@ export class Robot {
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist > 0.1) {
-        const step = this.currentStrategy.moveSpeed * dt;
+        const step = this.moveSpeed * dt;
         this.x += (dx / dist) * Math.min(step, dist);
         this.y += (dy / dist) * Math.min(step, dist);
       }
