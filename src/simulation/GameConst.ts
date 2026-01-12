@@ -1,5 +1,5 @@
 export const TICK_RATE = 20; // Ticks per second
-export const GAME_DURATION = 1500; // Seconds
+export const GAME_DURATION = 220; // Seconds
 
 // Field Dimensions and Layout
 // '#' = Obstacle, '.' = Empty, 'O' = Ball
