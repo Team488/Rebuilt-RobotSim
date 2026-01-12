@@ -9,6 +9,7 @@ import {
   ZONE_RATIO_RIGHT,
   BOUNDARY_WALL_HEIGHT_PERCENT,
 } from "./GameConst";
+import type { Team } from "./GameConst";
 import { ScoringLocation } from "./ScoringLocation";
 
 export interface EngineInterface {
@@ -168,6 +169,19 @@ export class Field {
     return this.scoringLocations.find(
       (loc) => loc.tileX === c && loc.tileY === r,
     );
+  }
+
+  static getRobotStartingPositions(team: Team): { x: number; y: number }[] {
+    const isRed = team === TEAM_RED;
+    const centerX = isRed
+      ? (FIELD_WIDTH * ZONE_RATIO_LEFT) / 2
+      : FIELD_WIDTH * (1 + ZONE_RATIO_RIGHT) / 2;
+
+    return [
+      { x: centerX, y: FIELD_HEIGHT / 3 },
+      { x: centerX, y: FIELD_HEIGHT / 2 },
+      { x: centerX, y: (2 * FIELD_HEIGHT) / 3 },
+    ];
   }
 
   findNearestOpenNode(x: number, y: number): { x: number; y: number } | null {

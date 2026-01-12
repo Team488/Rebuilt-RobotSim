@@ -5,7 +5,6 @@ import { BasicCollectorStrategy } from "./strategies/BasicCollectorStrategy";
 import {
   TICK_RATE,
   GAME_DURATION,
-  FIELD_WIDTH,
   TEAM_RED,
   TEAM_BLUE,
   SCORING_INTERVAL,
@@ -81,9 +80,12 @@ export class Engine {
   initializeTeam(team: Team, oldRobots?: Robot[]) {
     const cachedConfigs = this.loadConfigs();
 
+    const startPositions = Field.getRobotStartingPositions(team);
+
     for (let i = 0; i < ROBOTS_PER_TEAM; i++) {
-      const startX = team === TEAM_RED ? 1 + i : FIELD_WIDTH - 2 - i;
-      const startY = 1 + i * 2;
+      const pos = startPositions[i % startPositions.length];
+      const startX = pos.x;
+      const startY = pos.y;
       const id = `${team === TEAM_RED ? "R" : "B"}${i + 1}`;
 
       // Create robot with default strategies and default values from Robot class
