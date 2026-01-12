@@ -6,7 +6,6 @@ export const FIELD_WIDTH = 100;
 export const FIELD_HEIGHT = 60;
 export const NUM_BALLS = 400;
 
-
 export const TEAM_RED = "RED";
 export const TEAM_BLUE = "BLUE";
 export type Team = typeof TEAM_RED | typeof TEAM_BLUE;

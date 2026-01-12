@@ -20,12 +20,15 @@ export abstract class BaseStrategy implements RobotStrategy {
   status: string = "";
   abstract actionTime: number;
 
-  abstract decideMove(robot: Robot, field: Field): { x: number; y: number } | null;
+  abstract decideMove(
+    robot: Robot,
+    field: Field,
+  ): { x: number; y: number } | null;
   abstract decideAction(robot: Robot, field: Field): Action | null;
 }
 
-export abstract class ActiveScoringStrategy extends BaseStrategy { }
-export abstract class InactiveScoringStrategy extends BaseStrategy { }
+export abstract class ActiveScoringStrategy extends BaseStrategy {}
+export abstract class InactiveScoringStrategy extends BaseStrategy {}
 
 export class Robot {
   id: string;
