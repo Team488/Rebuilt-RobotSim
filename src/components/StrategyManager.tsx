@@ -13,52 +13,26 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
     const inactiveOptions = useMemo(() => ALL_INACTIVE_STRATEGIES.map(S => new S()), []);
 
     return (
-        <div
-            style={{
-                padding: "20px",
-                background: "#f9f9f9",
-                borderTop: "1px solid #ddd",
-                width: "100%",
-                boxSizing: "border-box",
-            }}
-        >
-            <h3 style={{ marginTop: 0, marginBottom: "20px", textAlign: "center", color: "#333" }}>
-                Robot Manager
+        <div className="strategy-manager-panel">
+            <h3 className="panel-title">
+                Robot Configurations
             </h3>
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "20px",
-                    maxWidth: "1200px",
-                    margin: "0 auto",
-                }}
-            >
+            <div className="robot-grid">
                 {engine.robots.map((robot) => (
                     <div
                         key={robot.id}
-                        style={{
-                            background: "#fff",
-                            padding: "15px",
-                            borderRadius: "10px",
-                            boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-                            border: `1px solid ${robot.team === "RED" ? "#ff4d4d33" : "#4d79ff33"}`,
-                            borderLeft: `6px solid ${robot.team === "RED" ? "#ff4d4d" : "#4d79ff"}`,
-                        }}
+                        className={`robot-card ${robot.team === "RED" ? "team-red" : "team-blue"}`}
                     >
-                        <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "12px", borderBottom: "1px solid #eee", paddingBottom: "8px" }}>
+                        <div className="robot-header">
                             Robot {robot.id}
                         </div>
 
-                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div className="robot-params">
                             {/* Strategy Selection Row */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Active Strat
-                                    </label>
+                            <div className="params-row">
+                                <div className="input-group">
+                                    <label>Active Strat</label>
                                     <select
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px" }}
                                         value={robot.scoringStrategy.name}
                                         onChange={(e) => {
                                             const StratClass = ALL_ACTIVE_STRATEGIES.find(S => new S().name === e.target.value);
@@ -77,12 +51,9 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Inactive Strat
-                                    </label>
+                                <div className="input-group">
+                                    <label>Inactive Strat</label>
                                     <select
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px" }}
                                         value={robot.collectionStrategy.name}
                                         onChange={(e) => {
                                             const StratClass = ALL_INACTIVE_STRATEGIES.find(S => new S().name === e.target.value);
@@ -102,16 +73,13 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                 </div>
                             </div>
 
-                            {/* Robot Constants Row 1 */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "5px" }}>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Move Speed (m/s)
-                                    </label>
+                            {/* Robot Constants Rows */}
+                            <div className="params-row">
+                                <div className="input-group">
+                                    <label>Speed (m/s)</label>
                                     <input
                                         type="number"
                                         step="0.1"
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
                                         value={robot.moveSpeed}
                                         onChange={(e) => {
                                             robot.moveSpeed = parseFloat(e.target.value) || 0;
@@ -120,13 +88,10 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         }}
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Max Balls
-                                    </label>
+                                <div className="input-group">
+                                    <label>Max Balls</label>
                                     <input
                                         type="number"
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
                                         value={robot.maxBalls}
                                         onChange={(e) => {
                                             robot.maxBalls = parseInt(e.target.value) || 0;
@@ -137,15 +102,11 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                 </div>
                             </div>
 
-                            {/* Robot Constants Row 2 */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Shot Delay (Ticks)
-                                    </label>
+                            <div className="params-row">
+                                <div className="input-group">
+                                    <label>Shot Delay</label>
                                     <input
                                         type="number"
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
                                         value={robot.baseShotCooldown}
                                         onChange={(e) => {
                                             robot.baseShotCooldown = parseInt(e.target.value) || 0;
@@ -154,14 +115,11 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         }}
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Shot Range (m)
-                                    </label>
+                                <div className="input-group">
+                                    <label>Range (m)</label>
                                     <input
                                         type="number"
                                         step="0.5"
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
                                         value={robot.maxShootDistance}
                                         onChange={(e) => {
                                             robot.maxShootDistance = parseFloat(e.target.value) || 0;
@@ -172,18 +130,14 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                 </div>
                             </div>
 
-                            {/* Robot Constants Row 3 */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Acc Min (0-1)
-                                    </label>
+                            <div className="params-row">
+                                <div className="input-group">
+                                    <label>Acc Min</label>
                                     <input
                                         type="number"
                                         step="0.05"
                                         min="0"
                                         max="1"
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
                                         value={robot.accuracyMin}
                                         onChange={(e) => {
                                             robot.accuracyMin = parseFloat(e.target.value) || 0;
@@ -192,16 +146,13 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                         }}
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
-                                        Acc Max (0-1)
-                                    </label>
+                                <div className="input-group">
+                                    <label>Acc Max</label>
                                     <input
                                         type="number"
                                         step="0.05"
                                         min="0"
                                         max="1"
-                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
                                         value={robot.accuracyMax}
                                         onChange={(e) => {
                                             robot.accuracyMax = parseFloat(e.target.value) || 0;

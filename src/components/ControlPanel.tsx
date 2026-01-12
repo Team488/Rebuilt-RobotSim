@@ -41,32 +41,25 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div style={{ marginTop: "20px", textAlign: "center" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          justifyContent: "center",
-          marginBottom: "15px",
-        }}
-      >
-        <div style={{ color: "#ff4d4d", fontWeight: "bold" }}>
-          Red Score: {engine.scoreRed}
+    <div className="control-panel-container">
+      <div className="score-display">
+        <div className="score-item red-score">
+          Red: {engine.scoreRed}
         </div>
-        <div style={{ color: "#4d79ff", fontWeight: "bold" }}>
-          Blue Score: {engine.scoreBlue}
+        <div className="score-item blue-score">
+          Blue: {engine.scoreBlue}
         </div>
-        <div>Time: {engine.time.toFixed(1)}s</div>
-        <div style={{ fontWeight: "600" }}>
-          Mode: {engine.currentScoringTeam === "RED" ? "🔴 RED" : "🔵 BLUE"}{" "}
-          SCORING
+        <div className="score-item time">Time: {engine.time.toFixed(1)}s</div>
+        <div className={`score-item mode-status ${engine.currentScoringTeam === "RED" ? "red" : "blue"}`}>
+          {engine.currentScoringTeam === "RED" ? "🔴 RED" : "🔵 BLUE"} SCORING
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "15px", justifyContent: "center", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      <div className="controls-group">
+        <div className="action-buttons">
           {isFinished ? (
             <button
+              className="primary-button"
               onClick={() => {
                 onReset();
                 onStart();
@@ -75,45 +68,47 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               Restart
             </button>
           ) : !isRunning ? (
-            <button onClick={onStart}>Start Simulation</button>
+            <button className="primary-button" onClick={onStart}>Start Simulation</button>
           ) : (
-            <button onClick={onStop}>Pause</button>
+            <button className="secondary-button" onClick={onStop}>Pause</button>
           )}
-          {!isFinished && <button onClick={onReset}>Reset</button>}
+          {!isFinished && (
+            <button className="reset-button" onClick={onReset}>Reset</button>
+          )}
         </div>
 
-        <div style={{ width: "2px", height: "24px", background: "#eee" }}></div>
+        <div className="divider"></div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "14px", fontWeight: "600", color: "#555" }}>
-            Sim Speed: {engine.playbackSpeed.toFixed(1)}x
+        <div className="speed-controls">
+          <span className="speed-label">
+            Speed: {engine.playbackSpeed.toFixed(1)}x
           </span>
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div className="speed-buttons">
             <button
               onClick={handleMuchSlower}
               title="Much Slower"
-              style={{ padding: "4px 8px", fontSize: "12px" }}
+              className="speed-btn"
             >
               {"<<"}
             </button>
             <button
               onClick={handleSlower}
               title="Slower"
-              style={{ padding: "4px 10px", fontSize: "12px" }}
+              className="speed-btn"
             >
               {"<"}
             </button>
             <button
               onClick={handleFaster}
               title="Faster"
-              style={{ padding: "4px 10px", fontSize: "12px" }}
+              className="speed-btn"
             >
               {">"}
             </button>
             <button
               onClick={handleMuchFaster}
               title="Much Faster"
-              style={{ padding: "4px 8px", fontSize: "12px" }}
+              className="speed-btn"
             >
               {">>"}
             </button>

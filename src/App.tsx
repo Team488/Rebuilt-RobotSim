@@ -58,32 +58,12 @@ function App() {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      height: "100vh",
-      width: "100vw",
-      overflow: "hidden",
-      backgroundColor: "#f0f2f5",
-      fontFamily: "'Outfit', sans-serif"
-    }}>
+    <div className={`app-container ${(leftOpen || rightOpen) ? "sidebar-open" : ""}`}>
       {/* Left Sidebar: Game Log */}
-      <div style={{
+      <div className={`sidebar left-sidebar ${!leftOpen ? "closed-mobile" : ""}`} style={{
         width: leftOpen ? "320px" : "0px",
-        height: "100%",
-        transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        position: "relative",
-        overflow: "visible",
-        flexShrink: 0,
-        backgroundColor: "#fff",
-        borderRight: leftOpen ? "1px solid #eee" : "none"
       }}>
-        <div style={{
-          width: "320px",
-          height: "100%",
-          opacity: leftOpen ? 1 : 0,
-          transition: "opacity 0.2s ease-in-out",
-          pointerEvents: leftOpen ? "auto" : "none"
-        }}>
+        <div className="sidebar-content" style={{ opacity: leftOpen ? 1 : 0 }}>
           <GameLog results={gameResults} onReset={clearLog} />
         </div>
         <button
@@ -103,32 +83,11 @@ function App() {
         </button>
       </div>
 
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        overflow: "hidden",
-        position: "relative"
-      }}>
-        <main style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "20px",
-          overflowY: "auto",
-          backgroundColor: "#fff"
-        }}>
-          <div style={{
+      <div className="main-content">
+        <main className="main-scroll-area">
+          <div className="field-container" style={{
             boxShadow: `0 10px 40px ${engineRef.current.currentScoringTeam === "RED" ? "rgba(255, 77, 79, 0.2)" : "rgba(24, 144, 255, 0.2)"}`,
-            borderRadius: "16px",
-            overflow: "hidden",
-            background: "#000",
-            padding: "8px",
-            flexShrink: 0,
             border: `4px solid ${engineRef.current.currentScoringTeam === "RED" ? "#ff4d4f" : "#1890ff"}`,
-            transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-            transform: "translateZ(0)"
           }}>
             <FieldView engine={engineRef.current} />
           </div>
@@ -142,30 +101,17 @@ function App() {
             onUpdate={forceUpdate}
           />
 
-          <div style={{ width: "100%", marginTop: "30px", borderTop: "2px solid #eee" }}>
+          <div className="strategy-manager-container">
             <StrategyManager engine={engineRef.current} onUpdate={forceUpdate} />
           </div>
         </main>
       </div>
 
       {/* Right Sidebar: Robot Info */}
-      <div style={{
+      <div className={`sidebar right-sidebar ${!rightOpen ? "closed-mobile" : ""}`} style={{
         width: rightOpen ? "320px" : "0px",
-        height: "100%",
-        transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        position: "relative",
-        overflow: "visible",
-        flexShrink: 0,
-        backgroundColor: "#fff",
-        borderLeft: rightOpen ? "1px solid #eee" : "none"
       }}>
-        <div style={{
-          width: "320px",
-          height: "100%",
-          opacity: rightOpen ? 1 : 0,
-          transition: "opacity 0.2s ease-in-out",
-          pointerEvents: rightOpen ? "auto" : "none"
-        }}>
+        <div className="sidebar-content" style={{ opacity: rightOpen ? 1 : 0 }}>
           <RobotSidePanel engine={engineRef.current} />
         </div>
         <button
@@ -182,6 +128,16 @@ function App() {
           title={rightOpen ? "Collapse Intelligence" : "Expand Intelligence"}
         >
           {rightOpen ? "→" : "←"}
+        </button>
+      </div>
+
+      {/* Mobile Menu Toggle Floating Buttons */}
+      <div className="mobile-menu-toggle">
+        <button onClick={() => setLeftOpen(!leftOpen)} style={{ backgroundColor: leftOpen ? "#333" : "#fff", color: leftOpen ? "#fff" : "#333" }}>
+          Log {leftOpen ? "×" : "≡"}
+        </button>
+        <button onClick={() => setRightOpen(!rightOpen)} style={{ backgroundColor: rightOpen ? "#333" : "#fff", color: rightOpen ? "#fff" : "#333" }}>
+          Intell {rightOpen ? "×" : "≡"}
         </button>
       </div>
     </div>
