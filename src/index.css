@@ -175,6 +175,7 @@ h4 {
     bottom: 0;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     max-width: 80vw;
+    z-index: 50;
   }
 
   .left-sidebar {
@@ -199,7 +200,16 @@ h4 {
     pointer-events: none;
   }
 
-  /* When sidebars are open on mobile, maybe dim the main content */
+  .main-scroll-area {
+    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* When sidebars are open on mobile, dim the main content */
   .app-container.sidebar-open::after {
     content: "";
     position: fixed;
@@ -218,9 +228,40 @@ h4 {
   }
 }
 
-@media (max-width: 768px) {
-  .main-scroll-area {
-    padding: 10px;
+@media (max-width: 600px) {
+  .params-row {
+    grid-template-columns: 1fr;
+  }
+
+  .control-panel-container {
+    padding: 15px 10px;
+  }
+
+  .score-display {
+    gap: 10px;
+    padding: 8px;
+  }
+
+  .score-item {
+    font-size: 0.85rem;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .action-buttons button {
+    flex: 1;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .speed-controls {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -232,16 +273,6 @@ h4 {
   transform: translateX(-50%);
   z-index: 110;
   gap: 10px;
-}
-
-@media (max-width: 1024px) {
-  .mobile-menu-toggle {
-    display: flex;
-  }
-
-  .main-scroll-area {
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 /* Control Panel Styles */
@@ -395,7 +426,7 @@ h4 {
 
 .robot-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
@@ -822,6 +853,7 @@ h4 {
 .team-management-header {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 30px;
   padding: 15px;
@@ -834,6 +866,22 @@ h4 {
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 140px;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .team-management-header {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .team-management-header button {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 .team-management-header button.selected {
