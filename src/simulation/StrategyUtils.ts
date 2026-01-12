@@ -352,5 +352,14 @@ export function isInTeamZone(x: number, team: Team): boolean {
  * Mean is 0, standard deviation is approximately 1.
  */
 export function roughGaussian(): number {
-  return (Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random() - 3) / 0.707;
+  return (
+    (Math.random() +
+      Math.random() +
+      Math.random() +
+      Math.random() +
+      Math.random() +
+      Math.random() -
+      3) /
+    0.707
+  );
 }
