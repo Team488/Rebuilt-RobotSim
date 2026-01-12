@@ -97,12 +97,13 @@ export function calculateSelectionScore(
   currentEV: number,
   targetEV: number,
 ): number {
-  const distToBall = Math.sqrt(
-    Math.pow(ball.x - start.x, 2) + Math.pow(ball.y - start.y, 2),
-  );
-  const distToTarget = Math.sqrt(
-    Math.pow(target.x - ball.x, 2) + Math.pow(target.y - ball.y, 2),
-  );
+  const dxToBall = ball.x - start.x;
+  const dyToBall = ball.y - start.y;
+  const distToBall = Math.sqrt(dxToBall * dxToBall + dyToBall * dyToBall);
+
+  const dxToTarget = target.x - ball.x;
+  const dyToTarget = target.y - ball.y;
+  const distToTarget = Math.sqrt(dxToTarget * dxToTarget + dyToTarget * dyToTarget);
 
   // Total distance cost
   const totalDist = distToBall + distToTarget;
@@ -223,12 +224,13 @@ export function getCollectionVector(
         if (gain <= 0.01) continue;
 
         // 2. Calculate Cost (Total Distance)
-        const distToBall = Math.sqrt(
-          Math.pow(ballX - robot.x, 2) + Math.pow(ballY - robot.y, 2),
-        );
-        const distToStaging = Math.sqrt(
-          Math.pow(stagingLoc.x - ballX, 2) + Math.pow(stagingLoc.y - ballY, 2),
-        );
+        const dxToBall = ballX - robot.x;
+        const dyToBall = ballY - robot.y;
+        const distToBall = Math.sqrt(dxToBall * dxToBall + dyToBall * dyToBall);
+
+        const dxToStaging = stagingLoc.x - ballX;
+        const dyToStaging = stagingLoc.y - ballY;
+        const distToStaging = Math.sqrt(dxToStaging * dxToStaging + dyToStaging * dyToStaging);
         const totalDist = distToBall + distToStaging;
 
         if (totalDist < 0.001) continue;
