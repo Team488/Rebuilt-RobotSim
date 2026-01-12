@@ -17,6 +17,7 @@ import {
 } from "../StrategyUtils";
 
 export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
+  id = "home_zone_scoring";
   name = "Home Zone Specialist";
   actionTime = 1.0;
 

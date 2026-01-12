@@ -9,6 +9,7 @@ import {
 } from "../StrategyUtils";
 
 export class RapidCycleStrategy extends ActiveScoringStrategy {
+    id = "rapid_cycle";
     name = "Rapid Cycle";
     actionTime = 0.3;
 

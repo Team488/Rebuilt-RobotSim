@@ -16,6 +16,7 @@ import {
 } from "../StrategyUtils";
 
 export class BasicScoringStrategy extends ActiveScoringStrategy {
+  id = "basic_scoring";
   name = "Basic Scoring";
   actionTime = 1.0;
 

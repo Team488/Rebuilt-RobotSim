@@ -9,7 +9,9 @@ import {
   isInTeamZone,
 } from "../StrategyUtils";
 
+
 export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
+  id = "aggressive_striker";
   name = "Aggressive Striker";
   actionTime = 0.5; // Very aggressive/fast
 

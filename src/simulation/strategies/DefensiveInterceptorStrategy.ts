@@ -4,6 +4,7 @@ import { Field } from "../Field";
 import { getPathTarget } from "../StrategyUtils";
 
 export class DefensiveInterceptorStrategy extends InactiveScoringStrategy {
+    id = "defensive_interceptor";
     name = "Defensive Interceptor";
     actionTime = 0.5;
 
