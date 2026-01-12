@@ -33,15 +33,18 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist <= robot.maxShootDistance * 0.9) {
+            this.status = "Aiming for goal";
             return null;
           }
 
           // In zone: Go to Goal
+          this.status = "Positioning for shot";
           return getPathTarget(field, robot, {
             x: scoreLoc.x + 0.5,
             y: scoreLoc.y + 0.5,
           });
         } else {
+          this.status = "Returning to zone";
           // Not in zone: Must move into zone
           // For Red: x < FIELD_WIDTH / 3. For Blue: x >= 2 * FIELD_WIDTH / 3.
           const safeZoneX =
@@ -66,8 +69,10 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
       EV_SCORED,
     );
     if (bestBall) {
+      this.status = "Foraging for balls";
       return getPathTarget(field, robot, bestBall);
     }
+    this.status = "Idle";
     return null;
   }
 
