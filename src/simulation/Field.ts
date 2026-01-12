@@ -21,8 +21,6 @@ export interface FlyingBall {
   y: number;
   targetX: number;
   targetY: number;
-  vx: number;
-  vy: number;
   speed: number;
   id: string; // Unique ID to track it if needed
   originX: number;
