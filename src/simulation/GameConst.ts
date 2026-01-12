@@ -2,28 +2,10 @@ export const TICK_RATE = 20; // Ticks per second
 export const GAME_DURATION = 220; // Seconds
 
 // Field Dimensions and Layout
-// '#' = Obstacle, '.' = Empty, 'O' = Ball
-export const INITIAL_FIELD_LAYOUT = [
-  "................................",
-  "................................",
-  "................................",
-  "................................",
-  "................................",
-  "..............OOOO..............",
-  "..............OOOO..............",
-  "..............OOOO..............",
-  "..............OOOO..............",
-  "..............OOOO..............",
-  "..............OOOO..............",
-  "................................",
-  "................................",
-  "................................",
-  "................................",
-  "................................",
-];
+export const FIELD_WIDTH = 100;
+export const FIELD_HEIGHT = 60;
+export const NUM_BALLS = 400;
 
-export const FIELD_WIDTH = INITIAL_FIELD_LAYOUT[0].length;
-export const FIELD_HEIGHT = INITIAL_FIELD_LAYOUT.length;
 
 export const TEAM_RED = "RED";
 export const TEAM_BLUE = "BLUE";

@@ -3,7 +3,7 @@ import {
   FIELD_HEIGHT,
   TEAM_RED,
   TEAM_BLUE,
-  INITIAL_FIELD_LAYOUT,
+  NUM_BALLS,
   FieldTile,
   ZONE_RATIO_LEFT,
   ZONE_RATIO_RIGHT,
@@ -31,12 +31,17 @@ export class Field {
   scoringLocations: ScoringLocation[];
   flyingBalls: FlyingBall[] = [];
 
-  constructor(width: number = FIELD_WIDTH, height: number = FIELD_HEIGHT) {
+  constructor(
+    width: number = FIELD_WIDTH,
+    height: number = FIELD_HEIGHT,
+    numBalls: number = NUM_BALLS,
+  ) {
     this.width = width;
     this.height = height;
-    this.grid = this.initializeGrid();
+    this.grid = this.initializeGrid(numBalls);
     this.scoringLocations = this.initializeScoringLocations();
   }
+
 
   private initializeScoringLocations(): ScoringLocation[] {
     // Integer coordinates for scoring zones
@@ -54,7 +59,7 @@ export class Field {
     ];
   }
 
-  private initializeGrid(): FieldTile[][] {
+  private initializeGrid(numBalls: number): FieldTile[][] {
     const rows = this.height;
     const cols = this.width;
 
@@ -62,16 +67,28 @@ export class Field {
       .fill(null)
       .map(() => Array(cols).fill(FieldTile.EMPTY));
 
-    // Load INITIAL_FIELD_LAYOUT
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const char = INITIAL_FIELD_LAYOUT[r][c];
-        if (char === "#") {
-          grid[r][c] = FieldTile.WALL;
-        } else if (char === ".") {
-          grid[r][c] = FieldTile.EMPTY;
-        } else if (char === "O") {
-          grid[r][c] = FieldTile.BALL;
+    // Automated Ball Placement (Center Rectangle)
+    const blockWidth = Math.ceil(Math.sqrt(numBalls));
+    const blockHeight = Math.ceil(numBalls / blockWidth);
+
+    const startC = Math.floor((cols - blockWidth) / 2);
+    const startR = Math.floor((rows - blockHeight) / 2);
+
+    let ballsPlaced = 0;
+    for (let r = 0; r < blockHeight; r++) {
+      for (let c = 0; c < blockWidth; c++) {
+        if (ballsPlaced < numBalls) {
+          const gridR = startR + r;
+          const gridC = startC + c;
+          if (
+            gridR >= 0 &&
+            gridR < rows &&
+            gridC >= 0 &&
+            gridC < cols
+          ) {
+            grid[gridR][gridC] = FieldTile.BALL;
+            ballsPlaced++;
+          }
         }
       }
     }
@@ -200,10 +217,11 @@ export class Field {
 }
 
 export class StartingField extends Field {
-  constructor() {
-    super();
+  constructor(numBalls: number = NUM_BALLS) {
+    super(FIELD_WIDTH, FIELD_HEIGHT, numBalls);
     // Configure start positions here if needed, or methods to set them
   }
+
 
   addBall(x: number, y: number) {
     const r = Math.floor(y);
