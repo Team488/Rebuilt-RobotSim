@@ -56,14 +56,21 @@ export class Field {
     return r >= 0 && r < this.height && c >= 0 && c < this.width;
   }
 
-  isPassable(r: number, c: number, ignoreRobots: boolean = false): boolean {
+  isPassable(r: number, c: number, ignoreRobots: boolean = false, robotIdToIgnore?: string): boolean {
     if (!this.isValidTile(r, c)) return false;
     if (this.grid[r][c] === FieldTile.WALL) return false;
 
     if (!ignoreRobots && this.engine) {
-      // Check if any robot is in this tile
+      // Check if any robot is in this tile or its nearest neighbor
       for (const robot of this.engine.robots) {
-        if (Math.floor(robot.y) === r && Math.floor(robot.x) === c) {
+        if (robotIdToIgnore && robot.id === robotIdToIgnore) continue;
+
+        const floorY = Math.floor(robot.y);
+        const floorX = Math.floor(robot.x);
+        const roundY = Math.max(0, Math.min(this.height - 1, Math.round(robot.y)));
+        const roundX = Math.max(0, Math.min(this.width - 1, Math.round(robot.x)));
+
+        if ((floorY === r && floorX === c) || (roundY === r && roundX === c)) {
           return false;
         }
       }
