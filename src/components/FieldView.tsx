@@ -90,6 +90,18 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
       engine.field.flyingBalls.forEach((ball) => {
         const x = ball.x * SCALE;
         const y = ball.y * SCALE;
+        const ox = ball.originX * SCALE;
+        const oy = ball.originY * SCALE;
+
+        // Draw flight trail
+        ctx.strokeStyle = "rgba(255, 204, 0, 0.4)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset
 
         // Shadow (simulate height by offsetting shadow)
         ctx.fillStyle = "rgba(0,0,0,0.5)";

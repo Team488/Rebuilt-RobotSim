@@ -171,6 +171,46 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({ engine, onUpda
                                     />
                                 </div>
                             </div>
+
+                            {/* Robot Constants Row 3 */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                                <div>
+                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
+                                        Acc Min (0-1)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.05"
+                                        min="0"
+                                        max="1"
+                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
+                                        value={robot.accuracyMin}
+                                        onChange={(e) => {
+                                            robot.accuracyMin = parseFloat(e.target.value) || 0;
+                                            engine.saveConfigs();
+                                            onUpdate();
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", fontSize: "11px", fontWeight: "bold", color: "#666", marginBottom: "4px" }}>
+                                        Acc Max (0-1)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.05"
+                                        min="0"
+                                        max="1"
+                                        style={{ width: "100%", padding: "6px", borderRadius: "5px", border: "1px solid #ddd", fontSize: "12px", boxSizing: "border-box" }}
+                                        value={robot.accuracyMax}
+                                        onChange={(e) => {
+                                            robot.accuracyMax = parseFloat(e.target.value) || 0;
+                                            engine.saveConfigs();
+                                            onUpdate();
+                                        }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
