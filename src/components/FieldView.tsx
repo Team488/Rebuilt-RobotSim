@@ -11,8 +11,9 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Scale factor: Tiles to Pixels
-  // Field is roughly 32x16. Let's aim for ~800px width. 800/32 = 25.
-  const SCALE = 30;
+  // Field is 100x60. Let's aim for ~1200px width. 1200/100 = 12.
+  const SCALE = 12;
+
 
   useEffect(() => {
     const render = () => {
