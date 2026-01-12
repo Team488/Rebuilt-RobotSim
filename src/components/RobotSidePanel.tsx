@@ -36,7 +36,7 @@ export const RobotSidePanel: React.FC<RobotSidePanelProps> = ({ engine }) => {
                         <div style={{ fontWeight: "bold", fontSize: "14px", marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
                             <span>{r.id}</span>
                             <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "10px", background: "#333", color: "#fff" }}>
-                                {r.currentMode}
+                                {r.currentStrategy.name}
                             </span>
                         </div>
                         <div style={{ fontSize: "12px", color: "#666" }}>
