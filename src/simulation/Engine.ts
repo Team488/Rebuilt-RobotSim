@@ -14,7 +14,7 @@ import {
   FieldTile,
 } from "./GameConst";
 import type { Team } from "./GameConst";
-import { isInTeamZone } from "./StrategyUtils";
+import { isInTeamZone, roughGaussian } from "./StrategyUtils";
 import { ALL_ACTIVE_STRATEGIES, ALL_INACTIVE_STRATEGIES } from "./strategies";
 
 const STORAGE_KEY = "robot_configs_v1";
@@ -88,6 +88,8 @@ export class Engine {
       let maxBalls = 3;
       let baseShotCooldown = 5;
       let maxShootDistance = 10;
+      let accuracyMin = 0.3;
+      let accuracyMax = 0.9;
 
       // Priority 1: Preserve from current session if requested
       const oldRobot = oldRobots?.find((r) => r.id === id);
@@ -98,6 +100,8 @@ export class Engine {
         maxBalls = oldRobot.maxBalls;
         baseShotCooldown = oldRobot.baseShotCooldown;
         maxShootDistance = oldRobot.maxShootDistance;
+        accuracyMin = oldRobot.accuracyMin;
+        accuracyMax = oldRobot.accuracyMax;
       } else {
         // Priority 2: Load from cache
         const config = cachedConfigs.find((c) => c.id === id);
@@ -108,10 +112,12 @@ export class Engine {
           const InactiveClass = ALL_INACTIVE_STRATEGIES.find((S) => new S().name === config.collectionStrategy);
           if (InactiveClass) collectionStrat = new InactiveClass();
 
-          moveSpeed = config.moveSpeed;
-          maxBalls = config.maxBalls;
-          baseShotCooldown = config.baseShotCooldown;
-          maxShootDistance = config.maxShootDistance;
+          moveSpeed = config.moveSpeed ?? 3.5;
+          maxBalls = config.maxBalls ?? 3;
+          baseShotCooldown = config.baseShotCooldown ?? 5;
+          maxShootDistance = config.maxShootDistance ?? 10;
+          accuracyMin = config.accuracyMin ?? 0.3;
+          accuracyMax = config.accuracyMax ?? 0.9;
         }
       }
 
@@ -127,6 +133,8 @@ export class Engine {
       robot.maxBalls = maxBalls;
       robot.baseShotCooldown = baseShotCooldown;
       robot.maxShootDistance = maxShootDistance;
+      robot.accuracyMin = accuracyMin;
+      robot.accuracyMax = accuracyMax;
 
       this.robots.push(robot);
     }
@@ -142,6 +150,8 @@ export class Engine {
         maxBalls: r.maxBalls,
         baseShotCooldown: r.baseShotCooldown,
         maxShootDistance: r.maxShootDistance,
+        accuracyMin: r.accuracyMin,
+        accuracyMax: r.accuracyMax,
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
     } catch (e) {
@@ -202,6 +212,7 @@ export class Engine {
     }
 
     const dt = (1.0 / TICK_RATE) * this.playbackSpeed;
+    if (this.time === 0) console.log("Engine Tick Started");
     this.time += dt;
     this.modeTimer += this.playbackSpeed;
 
@@ -336,63 +347,72 @@ export class Engine {
         }
       } else if (action?.type === "SHOOT") {
         if (robot.ballCount > 0 && robot.shotCooldown <= 0) {
-          // Check if scoring first (immediate score if at goal?)
-          // The request says: "Once the robot calls into to do shoot, it will loose that ball and the ball will be in shooting state."
-          // "It will go in that dir and land at the nearest grid point... Find the nearest open grid point."
-          // Actually, if it lands in a goal, does it score? The request implies shooting is a mechanic to move the ball, but user also said "Ability for robots to shoot the ball".
-          // "In their strategy should consider whether shooting is the best option or not."
-          // Wait, usually shooting is to SCORE.
-          // "Animate this... and land at the nearest grid point after moving the distance and angle."
-          // If the landing point is a GOAL, then it should score?
-          // Strategy calculates shoot viability.
-          // Let's implement generic shooting ball behavior. Scoring is checked if it lands in goal zone?
-          // BasicScoringStrategy directs it to the goal.
-
           robot.ballCount--;
 
           const dist = action.distance;
           const angle = action.angle;
 
-          const targetX = robot.x + Math.cos(angle) * dist;
-          const targetY = robot.y + Math.sin(angle) * dist;
+          // Calculate Accuracy Percentage (Lerp)
+          const distRatio = Math.min(Math.max(dist / robot.maxShootDistance, 0), 1);
+          const percentage =
+            robot.accuracyMax -
+            distRatio * (robot.accuracyMax - robot.accuracyMin);
 
-          // Check if lands in scoring location?
-          // The prompt: "It will go in that dir and land at the nearest grid point."
-          // If it lands in a scoring location, we should count it?
-          // Existing logic used checkScore called on robot.
-          // Now we shoot. If the target is the scoring, we need to detect that.
+          // Continuous spread based on accuracy (0 to 1)
+          const spreadScale = 2.0;
+          const spread = (1 - percentage) * spreadScale;
 
-          // Simple logic: Is targetX/Y inside a scoring location?
-          // const scoringLoc = this.field.scoringLocations.find(loc => loc.team === robot.team);
-          // Check if target is 'close enough' to goal center?
-          // Or let's just spawn the ball and let it fly.
-          // But if it flies to valid goal, we should process score on landing?
-          // OR: if the strategy says SHOOT, usually it intends to score.
-          // Let's defer score check to "On Land" above?
-          // OR: check now if it WILL land in goal.
+          const rg1 = roughGaussian();
+          const rg2 = roughGaussian();
 
-          // Actually, existing checkScore checks if robot is AT the location.
-          // New requirement: Robot shoots with dist/angle.
-          // If target is goal, it scores.
+          const realTargetX =
+            robot.x + Math.cos(angle) * dist + rg1 * spread;
+          const realTargetY =
+            robot.y + Math.sin(angle) * dist + rg2 * spread;
 
-          // Let's create the flying ball.
-          this.field.flyingBalls.push({
-            x: robot.x,
-            y: robot.y,
-            targetX: targetX,
-            targetY: targetY,
-            vx: Math.cos(angle) * BALL_SPEED,
-            vy: Math.sin(angle) * BALL_SPEED,
-            speed: BALL_SPEED,
-            id: `ball-${Date.now()}-${Math.random()}`,
-            originX: robot.x,
-            originY: robot.y,
-          });
+          if (isNaN(realTargetX) || isNaN(realTargetY)) {
+            console.error(
+              `Shooting Error: Invalid target. Defaulting to perfect shot.`,
+            );
+            // Fallback to perfect shot
+            const newBall = {
+              x: robot.x,
+              y: robot.y,
+              targetX: robot.x + Math.cos(angle) * dist,
+              targetY: robot.y + Math.sin(angle) * dist,
+              vx: Math.cos(angle) * BALL_SPEED,
+              vy: Math.sin(angle) * BALL_SPEED,
+              speed: BALL_SPEED,
+              id: `ball-${Date.now()}-${Math.random()}`,
+              originX: robot.x,
+              originY: robot.y,
+            };
+            this.field.flyingBalls.push(newBall);
+            robot.shotCooldown = robot.baseShotCooldown;
+          } else {
+            const newBall = {
+              x: robot.x,
+              y: robot.y,
+              targetX: realTargetX,
+              targetY: realTargetY,
+              vx: Math.cos(angle) * BALL_SPEED,
+              vy: Math.sin(angle) * BALL_SPEED,
+              speed: BALL_SPEED,
+              id: `ball-${Date.now()}-${Math.random()}`,
+              originX: robot.x,
+              originY: robot.y,
+            };
 
-          robot.shotCooldown = robot.baseShotCooldown;
-          console.log(`${robot.id} SHOT ball.`);
+            this.field.flyingBalls.push(newBall);
+
+            robot.shotCooldown = robot.baseShotCooldown;
+            console.log(
+              `${robot.id} SHOT ball with ${Math.round(percentage * 100)}% accuracy. Target: ${realTargetX.toFixed(1)}, ${realTargetY.toFixed(1)}`,
+            );
+          }
         }
-      } else if (action?.type === "DROP") {
+      }
+      else if (action?.type === "DROP") {
         if (robot.ballCount > 0) {
           const r = Math.floor(robot.y);
           const c = Math.floor(robot.x);

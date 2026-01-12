@@ -345,3 +345,12 @@ export function isInTeamZone(x: number, team: Team): boolean {
     return x >= Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1;
   }
 }
+
+/**
+ * Returns a random number with a rough gaussian distribution.
+ * Uses the sum of uniform random variables (Central Limit Theorem).
+ * Mean is 0, standard deviation is approximately 1.
+ */
+export function roughGaussian(): number {
+  return (Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random() - 3) / 0.707;
+}
