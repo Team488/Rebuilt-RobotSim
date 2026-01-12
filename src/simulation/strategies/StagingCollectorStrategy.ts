@@ -9,6 +9,7 @@ import {
 } from "../StrategyUtils";
 
 export class StagingCollectorStrategy extends InactiveScoringStrategy {
+  id = "staging_collector";
   name = "Staging Collector";
   actionTime = 0.6;
   isDelivering = false;

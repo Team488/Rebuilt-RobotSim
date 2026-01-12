@@ -9,6 +9,7 @@ import {
 } from "../StrategyUtils";
 
 export class ChaosSniperStrategy extends InactiveScoringStrategy {
+    id = "chaos_sniper";
     name = "Chaos Sniper";
     actionTime = 0.6;
 

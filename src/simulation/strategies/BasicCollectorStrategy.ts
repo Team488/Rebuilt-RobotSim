@@ -10,6 +10,7 @@ import {
 } from "../StrategyUtils";
 
 export class BasicCollectorStrategy extends InactiveScoringStrategy {
+  id = "basic_collector";
   name = "Basic Collector";
   actionTime = 0.5; // Fast pickup
   isDelivering = false;

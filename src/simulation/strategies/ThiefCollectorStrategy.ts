@@ -10,6 +10,7 @@ import {
 } from "../StrategyUtils";
 
 export class ThiefCollectorStrategy extends InactiveScoringStrategy {
+  id = "thief_collector";
   name = "Opponent Thief";
   actionTime = 0.5;
   isDelivering = false;

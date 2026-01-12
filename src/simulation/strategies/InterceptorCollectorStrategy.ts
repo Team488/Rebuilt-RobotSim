@@ -9,6 +9,7 @@ import {
 } from "../StrategyUtils";
 
 export class InterceptorCollectorStrategy extends InactiveScoringStrategy {
+  id = "interceptor_collector";
   name = "Neutral Interceptor";
   actionTime = 0.4;
   isDelivering = false;
