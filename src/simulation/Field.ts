@@ -42,7 +42,6 @@ export class Field {
     this.scoringLocations = this.initializeScoringLocations();
   }
 
-
   private initializeScoringLocations(): ScoringLocation[] {
     // Integer coordinates for scoring zones
     return [
@@ -80,12 +79,7 @@ export class Field {
         if (ballsPlaced < numBalls) {
           const gridR = startR + r;
           const gridC = startC + c;
-          if (
-            gridR >= 0 &&
-            gridR < rows &&
-            gridC >= 0 &&
-            gridC < cols
-          ) {
+          if (gridR >= 0 && gridR < rows && gridC >= 0 && gridC < cols) {
             grid[gridR][gridC] = FieldTile.BALL;
             ballsPlaced++;
           }
@@ -221,7 +215,6 @@ export class StartingField extends Field {
     super(FIELD_WIDTH, FIELD_HEIGHT, numBalls);
     // Configure start positions here if needed, or methods to set them
   }
-
 
   addBall(x: number, y: number) {
     const r = Math.floor(y);

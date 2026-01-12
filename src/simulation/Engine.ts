@@ -108,10 +108,14 @@ export class Engine {
         // Priority 2: Load from cache
         const config = cachedConfigs.find((c) => c.id === id);
         if (config) {
-          const ActiveClass = ALL_ACTIVE_STRATEGIES.find((S) => new S().name === config.scoringStrategy);
+          const ActiveClass = ALL_ACTIVE_STRATEGIES.find(
+            (S) => new S().name === config.scoringStrategy,
+          );
           if (ActiveClass) scoringStrat = new ActiveClass();
 
-          const InactiveClass = ALL_INACTIVE_STRATEGIES.find((S) => new S().name === config.collectionStrategy);
+          const InactiveClass = ALL_INACTIVE_STRATEGIES.find(
+            (S) => new S().name === config.collectionStrategy,
+          );
           if (InactiveClass) collectionStrat = new InactiveClass();
 
           moveSpeed = config.moveSpeed ?? 3.5;
@@ -129,7 +133,7 @@ export class Engine {
         startY,
         team,
         scoringStrat,
-        collectionStrat
+        collectionStrat,
       );
       robot.moveSpeed = moveSpeed;
       robot.maxBalls = maxBalls;
@@ -355,7 +359,10 @@ export class Engine {
           const angle = action.angle;
 
           // Calculate Accuracy Percentage (Lerp)
-          const distRatio = Math.min(Math.max(dist / robot.maxShootDistance, 0), 1);
+          const distRatio = Math.min(
+            Math.max(dist / robot.maxShootDistance, 0),
+            1,
+          );
           const percentage =
             robot.accuracyMax -
             distRatio * (robot.accuracyMax - robot.accuracyMin);
@@ -367,10 +374,8 @@ export class Engine {
           const rg1 = roughGaussian();
           const rg2 = roughGaussian();
 
-          const realTargetX =
-            robot.x + Math.cos(angle) * dist + rg1 * spread;
-          const realTargetY =
-            robot.y + Math.sin(angle) * dist + rg2 * spread;
+          const realTargetX = robot.x + Math.cos(angle) * dist + rg1 * spread;
+          const realTargetY = robot.y + Math.sin(angle) * dist + rg2 * spread;
 
           if (isNaN(realTargetX) || isNaN(realTargetY)) {
             console.error(
@@ -413,8 +418,7 @@ export class Engine {
             );
           }
         }
-      }
-      else if (action?.type === "DROP") {
+      } else if (action?.type === "DROP") {
         if (robot.ballCount > 0) {
           const r = Math.floor(robot.y);
           const c = Math.floor(robot.x);

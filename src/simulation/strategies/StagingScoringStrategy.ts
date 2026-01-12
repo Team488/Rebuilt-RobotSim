@@ -1,88 +1,100 @@
 import { Robot, ActiveScoringStrategy } from "../Robot";
 import type { Action } from "../Robot";
 import { Field } from "../Field";
+import { FieldTile, EV_SCORED } from "../GameConst";
 import {
-    FieldTile,
-    EV_SCORED,
-} from "../GameConst";
-import {
-    findBestEVBall,
-    getScoringLocation,
-    getStagingLocation,
-    getPathTarget,
-    isInTeamZone,
+  findBestEVBall,
+  getScoringLocation,
+  getStagingLocation,
+  getPathTarget,
+  isInTeamZone,
 } from "../StrategyUtils";
 
 export class StagingScoringStrategy extends ActiveScoringStrategy {
-    name = "Staging Scorer";
-    actionTime = 0.8;
+  name = "Staging Scorer";
+  actionTime = 0.8;
 
-    decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
-        if (robot.ballCount > 0) {
-            // If in home zone, go score
-            if (isInTeamZone(robot.x, robot.team)) {
-                this.status = "Moving to score";
-                const scoreLoc = getScoringLocation(field, robot.team);
-                if (scoreLoc) {
-                    return getPathTarget(field, robot, { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 });
-                }
-            }
-
-            // If in neutral/opponent zone, move to staging area or boundary
-            const stagingLoc = getStagingLocation(field, robot.team);
-            if (stagingLoc) {
-                this.status = "Moving to staging";
-                return getPathTarget(field, robot, {
-                    x: stagingLoc.x + 0.5,
-                    y: stagingLoc.y + 0.5,
-                });
-            }
-        }
-
+  decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
+    if (robot.ballCount > 0) {
+      // If in home zone, go score
+      if (isInTeamZone(robot.x, robot.team)) {
+        this.status = "Moving to score";
         const scoreLoc = getScoringLocation(field, robot.team);
-        const targetPos = scoreLoc ? { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 } : robot;
-
-        const { ball: bestBall } = findBestEVBall(field, robot, targetPos, EV_SCORED);
-        if (bestBall) {
-            this.status = "Collecting high-value balls";
-            return getPathTarget(field, robot, bestBall);
+        if (scoreLoc) {
+          return getPathTarget(field, robot, {
+            x: scoreLoc.x + 0.5,
+            y: scoreLoc.y + 0.5,
+          });
         }
-        this.status = "Awaiting targets";
-        return null;
+      }
+
+      // If in neutral/opponent zone, move to staging area or boundary
+      const stagingLoc = getStagingLocation(field, robot.team);
+      if (stagingLoc) {
+        this.status = "Moving to staging";
+        return getPathTarget(field, robot, {
+          x: stagingLoc.x + 0.5,
+          y: stagingLoc.y + 0.5,
+        });
+      }
     }
 
-    decideAction(robot: Robot, field: Field): Action | null {
-        if (robot.ballCount > 0) {
-            const scoringLoc = getScoringLocation(field, robot.team);
-            const stagingLoc = getStagingLocation(field, robot.team);
+    const scoreLoc = getScoringLocation(field, robot.team);
+    const targetPos = scoreLoc
+      ? { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 }
+      : robot;
 
-            if (isInTeamZone(robot.x, robot.team) && scoringLoc) {
-                const dx = scoringLoc.x + 0.5 - robot.x;
-                const dy = scoringLoc.y + 0.5 - robot.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist <= robot.maxShootDistance) {
-                    return { type: "SHOOT", distance: dist, angle: Math.atan2(dy, dx) };
-                }
-            } else if (stagingLoc) {
-                // Shoot towards staging from outside
-                const dx = stagingLoc.x + 0.5 - robot.x;
-                const dy = stagingLoc.y + 0.5 - robot.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist <= robot.maxShootDistance) {
-                    return { type: "SHOOT", distance: dist, angle: Math.atan2(dy, dx) };
-                }
-            }
-        }
-
-        if (robot.ballCount < robot.maxBalls) {
-            const r = Math.floor(robot.y);
-            const c = Math.floor(robot.x);
-            if (r >= 0 && r < field.grid.length && c >= 0 && c < field.grid[0].length) {
-                if (field.grid[r][c] === FieldTile.BALL) {
-                    return { type: "COLLECT" };
-                }
-            }
-        }
-        return null;
+    const { ball: bestBall } = findBestEVBall(
+      field,
+      robot,
+      targetPos,
+      EV_SCORED,
+    );
+    if (bestBall) {
+      this.status = "Collecting high-value balls";
+      return getPathTarget(field, robot, bestBall);
     }
+    this.status = "Awaiting targets";
+    return null;
+  }
+
+  decideAction(robot: Robot, field: Field): Action | null {
+    if (robot.ballCount > 0) {
+      const scoringLoc = getScoringLocation(field, robot.team);
+      const stagingLoc = getStagingLocation(field, robot.team);
+
+      if (isInTeamZone(robot.x, robot.team) && scoringLoc) {
+        const dx = scoringLoc.x + 0.5 - robot.x;
+        const dy = scoringLoc.y + 0.5 - robot.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= robot.maxShootDistance) {
+          return { type: "SHOOT", distance: dist, angle: Math.atan2(dy, dx) };
+        }
+      } else if (stagingLoc) {
+        // Shoot towards staging from outside
+        const dx = stagingLoc.x + 0.5 - robot.x;
+        const dy = stagingLoc.y + 0.5 - robot.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= robot.maxShootDistance) {
+          return { type: "SHOOT", distance: dist, angle: Math.atan2(dy, dx) };
+        }
+      }
+    }
+
+    if (robot.ballCount < robot.maxBalls) {
+      const r = Math.floor(robot.y);
+      const c = Math.floor(robot.x);
+      if (
+        r >= 0 &&
+        r < field.grid.length &&
+        c >= 0 &&
+        c < field.grid[0].length
+      ) {
+        if (field.grid[r][c] === FieldTile.BALL) {
+          return { type: "COLLECT" };
+        }
+      }
+    }
+    return null;
+  }
 }

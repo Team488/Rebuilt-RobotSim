@@ -11,16 +11,15 @@ import { InterceptorCollectorStrategy } from "./strategies/InterceptorCollectorS
 import { ActiveScoringStrategy, InactiveScoringStrategy } from "./Robot";
 
 export const ALL_ACTIVE_STRATEGIES: (new () => ActiveScoringStrategy)[] = [
-    BasicScoringStrategy,
-    HomeZoneScoringStrategy,
-    StagingScoringStrategy,
-    AggressiveStrikerStrategy,
+  BasicScoringStrategy,
+  HomeZoneScoringStrategy,
+  StagingScoringStrategy,
+  AggressiveStrikerStrategy,
 ];
 
 export const ALL_INACTIVE_STRATEGIES: (new () => InactiveScoringStrategy)[] = [
-    BasicCollectorStrategy,
-    ThiefCollectorStrategy,
-    StagingCollectorStrategy,
-    InterceptorCollectorStrategy,
+  BasicCollectorStrategy,
+  ThiefCollectorStrategy,
+  StagingCollectorStrategy,
+  InterceptorCollectorStrategy,
 ];
-
