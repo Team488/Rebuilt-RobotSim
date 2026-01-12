@@ -1,4 +1,5 @@
 import { Field } from "./Field";
+import { AStar } from "./AStar";
 import { BASE_TICK_RATE } from "./GameConst";
 import type { Team } from "./GameConst";
 
@@ -51,6 +52,13 @@ export class Robot {
   collectionStrategy: RobotStrategy;
   currentMode: "SCORING" | "COLLECTING" = "COLLECTING";
 
+  // Performance Cache
+  private lastStrategyTarget: { x: number; y: number } | null = null;
+  private cachedPath: { x: number; y: number }[] | null = null;
+  private lastX: number = 0;
+  private lastY: number = 0;
+  private stuckTicks: number = 0;
+
   constructor(
     id: string,
     x: number,
@@ -78,36 +86,64 @@ export class Robot {
   }
 
   move(field: Field) {
-    const moveTarget = this.currentStrategy.decideMove(this, field);
-    if (moveTarget) {
-      const dx = moveTarget.x - this.x;
-      const dy = moveTarget.y - this.y;
+    const target = this.currentStrategy.decideMove(this, field);
+    if (!target) {
+      this.cachedPath = null;
+      this.lastStrategyTarget = null;
+      return;
+    }
+
+    // Check if we need to re-path
+    const targetChanged =
+      !this.lastStrategyTarget ||
+      Math.abs(target.x - this.lastStrategyTarget.x) > 0.1 ||
+      Math.abs(target.y - this.lastStrategyTarget.y) > 0.1;
+
+    // Stuck detection
+    const dxLast = this.x - this.lastX;
+    const dyLast = this.y - this.lastY;
+    const distMoved = Math.sqrt(dxLast * dxLast + dyLast * dyLast);
+    if (distMoved < 0.05) {
+      this.stuckTicks++;
+    } else {
+      this.stuckTicks = 0;
+    }
+
+    const isStuck = this.stuckTicks > 10;
+
+    if (targetChanged || isStuck || !this.cachedPath || this.cachedPath.length === 0) {
+      const path = AStar.findPath(field, { x: this.x, y: this.y }, target);
+      if (path && path.length > 1) {
+        this.cachedPath = path.slice(1); // Skip current tile
+      } else {
+        this.cachedPath = path;
+      }
+      this.lastStrategyTarget = target;
+      if (isStuck) this.stuckTicks = 0;
+    }
+
+    this.lastX = this.x;
+    this.lastY = this.y;
+
+    if (this.cachedPath && this.cachedPath.length > 0) {
+      const nextPoint = this.cachedPath[0];
+      const dx = nextPoint.x - this.x;
+      const dy = nextPoint.y - this.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist > 0.1) {
         const step = this.moveSpeed;
-        this.x += (dx / dist) * Math.min(step, dist);
-        this.y += (dy / dist) * Math.min(step, dist);
+        const moveAttempt = Math.min(step, dist);
+        this.x += (dx / dist) * moveAttempt;
+        this.y += (dy / dist) * moveAttempt;
+      } else {
+        // Reached waypoint
+        this.cachedPath.shift();
       }
     }
   }
 
-  do(field: Field) {
-    const action = this.currentStrategy.decideAction(this, field);
-    if (action?.type === "SHOOT" && this.ballCount > 0) {
-      console.log(`${this.id} Shooting!`);
-      // Note: Actual scoring handled by Engine/Field check,
-      // but here we mark ball as gone from robot.
-      // Ideally Engine checks collisions.
-      // Let's just consume ball for now from robot state.
-      // This is a backup if Engine doesn't catch it, but Engine should handle scoring.
-      // PROMPT UPDATE: Engine handles actual score/ball removal?
-      // Engine line 133: robot.hasBall = false; -> Needs update to ballCount--
-      // We will let Engine handle the logic of modifying ballCount for SHOOT/COLLECT to avoid double counting.
-      // But we can log intent here.
-    } else if (action?.type === "COLLECT" && this.ballCount < this.maxBalls) {
-      console.log(`${this.id} Collecting!`);
-      // Engine update handles adding ball to robot
-    }
+  do(_field: Field) {
+    // Decision logic handled by Engine/Strategy directly for performance
   }
 }
