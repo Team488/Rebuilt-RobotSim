@@ -1,7 +1,7 @@
 import { Robot, ActiveScoringStrategy } from "../Robot";
 import type { Action } from "../Robot";
 import { Field } from "../Field";
-import { FieldTile, EV_SCORED } from "../GameConst";
+import { FieldTile } from "../GameConst";
 import {
   findBestEVBall,
   getScoringLocation,
@@ -40,16 +40,13 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
       }
     }
 
-    const scoreLoc = getScoringLocation(field, robot.team);
-    const targetPos = scoreLoc
-      ? { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 }
-      : robot;
-
     const { ball: bestBall } = findBestEVBall(
       field,
       robot,
-      targetPos,
-      EV_SCORED,
+      undefined,
+      undefined,
+      undefined,
+      "ABSOLUTE"
     );
     if (bestBall) {
       this.status = "Collecting high-value balls";

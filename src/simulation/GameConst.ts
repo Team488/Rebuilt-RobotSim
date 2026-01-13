@@ -32,5 +32,4 @@ export type FieldTile = (typeof FieldTile)[keyof typeof FieldTile];
 export const EV_OWN_ZONE = 0.9;
 export const EV_NEUTRAL_ZONE = 0.3;
 export const EV_OPPONENT_ZONE = 0.1;
-export const EV_SCORED = 1.0;
 export const DIST_EV_COST = 0.01;

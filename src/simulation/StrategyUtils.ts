@@ -150,10 +150,11 @@ export function getScoringLocation(
 export function findBestEVBall(
   field: Field,
   robot: Robot,
-  targetPos: { x: number; y: number },
-  targetEV: number,
+  targetPos?: { x: number; y: number },
+  targetEV?: number,
   filterFn?: (r: number, c: number) => boolean,
-): { ball: { x: number; y: number } | null; ballsOnField: number } {
+  mode: "GAIN" | "ABSOLUTE" = "GAIN",
+): { ball: { x: number; y: number } | null; ballsOnField: number; maxScore: number } {
   let bestBall: { x: number; y: number } | null = null;
   let maxScore = -Infinity;
   let ballsOnField = 0;
@@ -171,13 +172,23 @@ export function findBestEVBall(
     const ballPos = { x: bx, y: by };
     const currentEV = getBallEV(bx, by, robot.team, field);
 
-    const score = calculateSelectionScore(
-      robot,
-      ballPos,
-      targetPos,
-      currentEV,
-      targetEV,
-    );
+    let score: number;
+    if (mode === "GAIN" && targetPos !== undefined && targetEV !== undefined) {
+      score = calculateSelectionScore(
+        robot,
+        ballPos,
+        targetPos,
+        currentEV,
+        targetEV,
+      );
+    } else {
+      // ABSOLUTE Mode: Prefer balls that already have high EV and are close
+      // Or fallback if GAIN is requested without targets
+      const dxToBall = bx - robot.x;
+      const dyToBall = by - robot.y;
+      const distToBall = Math.sqrt(dxToBall * dxToBall + dyToBall * dyToBall);
+      score = currentEV - distToBall * DIST_EV_COST;
+    }
 
     if (score > maxScore) {
       maxScore = score;
@@ -185,7 +196,7 @@ export function findBestEVBall(
     }
   });
 
-  return { ball: bestBall, ballsOnField };
+  return { ball: bestBall, ballsOnField, maxScore };
 }
 
 export function getCollectionVector(

@@ -3,7 +3,6 @@ import type { Action } from "../Robot";
 import { Field } from "../Field";
 import {
   FieldTile,
-  EV_SCORED,
   FIELD_WIDTH,
   FIELD_HEIGHT,
   ZONE_RATIO_LEFT,
@@ -58,9 +57,10 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
     const { ball: bestBall } = findBestEVBall(
       field,
       robot,
-      robot, // Target current pos to stay local
-      EV_SCORED,
+      undefined,
+      undefined,
       (_, c) => isInTeamZone(c + 0.5, robot.team),
+      "ABSOLUTE"
     );
 
     if (bestBall) {

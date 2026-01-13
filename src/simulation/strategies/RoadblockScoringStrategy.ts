@@ -3,7 +3,6 @@ import type { Action } from "../Robot";
 import { Field } from "../Field";
 import {
     FieldTile,
-    EV_SCORED,
     BOUNDARY_WALL_HEIGHT_PERCENT,
 } from "../GameConst";
 import {
@@ -86,17 +85,13 @@ export class RoadblockScoringStrategy extends ActiveScoringStrategy {
             }
         }
 
-        // Else, find ball to reload
-        const scoreLoc = getScoringLocation(field, robot.team);
-        const targetPos = scoreLoc
-            ? { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 }
-            : { x: robot.x, y: robot.y };
-
         const { ball: bestBall } = findBestEVBall(
             field,
             robot,
-            targetPos,
-            EV_SCORED,
+            undefined,
+            undefined,
+            undefined,
+            "ABSOLUTE"
         );
         if (bestBall) {
             this.status = "Foraging for balls";

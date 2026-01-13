@@ -1,7 +1,7 @@
 import { Robot, ActiveScoringStrategy } from "../Robot";
 import type { Action } from "../Robot";
 import { Field } from "../Field";
-import { FieldTile, EV_SCORED } from "../GameConst";
+import { FieldTile } from "../GameConst";
 import {
   findBestEVBall,
   getScoringLocation,
@@ -31,12 +31,13 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
     const { ball: deepBall } = findBestEVBall(
       field,
       robot,
-      robot,
-      EV_SCORED,
+      undefined,
+      undefined,
       (_, c) => {
         // Ball is NOT in our zone
         return !isInTeamZone(c + 0.5, robot.team);
       },
+      "ABSOLUTE"
     );
 
     if (deepBall) {
@@ -44,7 +45,7 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
       return getPathTarget(field, robot, deepBall);
     }
 
-    const { ball: anyBall } = findBestEVBall(field, robot, robot, EV_SCORED);
+    const { ball: anyBall } = findBestEVBall(field, robot, undefined, undefined, undefined, "ABSOLUTE");
     if (anyBall) {
       this.status = "Scanning for targets";
       return getPathTarget(field, robot, anyBall);

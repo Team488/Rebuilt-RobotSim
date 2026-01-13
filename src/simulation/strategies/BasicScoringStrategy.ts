@@ -3,7 +3,6 @@ import type { Action } from "../Robot";
 import { Field } from "../Field";
 import {
   FieldTile,
-  EV_SCORED,
   FIELD_WIDTH,
   ZONE_RATIO_LEFT,
   ZONE_RATIO_RIGHT,
@@ -32,8 +31,10 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
       const { ball: bestBall } = findBestEVBall(
         field,
         robot,
-        goalPos,
-        EV_SCORED,
+        undefined,
+        undefined,
+        undefined,
+        "ABSOLUTE"
       );
       if (bestBall) {
         return getPathTarget(field, robot, bestBall);
