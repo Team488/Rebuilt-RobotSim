@@ -21,6 +21,8 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
     const [teamToSave, setTeamToSave] = useState<"RED" | "BLUE">("RED");
     const [teamToLoad, setTeamToLoad] = useState<string | null>(null);
     const [loadAsTeam, setLoadAsTeam] = useState<"RED" | "BLUE">("RED");
+    const [editingRobotId, setEditingRobotId] = useState<string | null>(null);
+    const [tempName, setTempName] = useState("");
 
     // Pre-instantiate to get names for the dropdowns once
     const activeOptions = useMemo(
@@ -138,7 +140,51 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                         key={robot.id}
                         className={`robot-card ${robot.team === "RED" ? "team-red" : "team-blue"}`}
                     >
-                        <div className="robot-header">Robot {robot.id}</div>
+                        <div className="robot-header">
+                            {editingRobotId === robot.id ? (
+                                <input
+                                    autoFocus
+                                    className="robot-name-input"
+                                    value={tempName}
+                                    onChange={(e) => setTempName(e.target.value)}
+                                    onBlur={() => {
+                                        if (tempName.trim()) {
+                                            robot.name = tempName.trim();
+                                            engine.saveConfigs();
+                                        }
+                                        setEditingRobotId(null);
+                                        onUpdate();
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            if (tempName.trim()) {
+                                                robot.name = tempName.trim();
+                                                engine.saveConfigs();
+                                            }
+                                            setEditingRobotId(null);
+                                            onUpdate();
+                                        } else if (e.key === "Escape") {
+                                            setEditingRobotId(null);
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <div className="robot-name-container">
+                                    <span className="robot-name-display">{robot.name}</span>
+                                    <button
+                                        className="edit-name-btn"
+                                        onClick={() => {
+                                            setEditingRobotId(robot.id);
+                                            setTempName(robot.name);
+                                        }}
+                                        title="Rename Robot"
+                                    >
+                                        ✏️
+                                    </button>
+                                </div>
+                            )}
+                            <span className="robot-id-tag">#{robot.id}</span>
+                        </div>
 
                         <div className="robot-params">
                             {/* Strategy Selection Row */}

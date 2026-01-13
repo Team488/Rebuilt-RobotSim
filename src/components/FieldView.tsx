@@ -150,7 +150,7 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
         ctx.fillStyle = "white";
         ctx.font = "10px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(robot.id, x, y - 0.5 * SCALE);
+        ctx.fillText(robot.name, x, y - 0.5 * SCALE);
 
         // Has Ball Indicator (Count)
         if (robot.ballCount > 0) {

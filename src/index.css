@@ -843,8 +843,16 @@ h4 {
   align-items: center;
 }
 
-.robot-id {
+.robot-name {
   font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.info-card-header .robot-id {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
 .strategy-tag {
@@ -1113,4 +1121,61 @@ h4 {
 .team-delete-btn:hover {
   background: rgba(255, 77, 79, 0.1) !important;
   transform: scale(1.1) translateY(0) !important;
+}
+
+/* Robot Naming UI */
+.robot-name-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.robot-name-display {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.edit-name-btn {
+  background: none !important;
+  border: none !important;
+  padding: 4px !important;
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none !important;
+  transition: opacity 0.2s !important;
+  margin: 0 !important;
+}
+
+.edit-name-btn:hover {
+  opacity: 1;
+  background-color: var(--bg-secondary) !important;
+  transform: none !important;
+}
+
+.robot-name-input {
+  border: 1px solid #1890ff !important;
+  background: var(--bg-input);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 4px 8px !important;
+  border-radius: 6px;
+  width: 100%;
+  margin-right: 8px;
+}
+
+.robot-id-tag {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
 }

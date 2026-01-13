@@ -53,6 +53,7 @@ export class Robot {
   scoringStrategy: RobotStrategy;
   collectionStrategy: RobotStrategy;
   currentMode: "SCORING" | "COLLECTING" = "COLLECTING";
+  name: string;
 
   // Performance Cache
   private lastStrategyTarget: { x: number; y: number } | null = null;
@@ -68,6 +69,7 @@ export class Robot {
     team: Team,
     scoringStrategy: RobotStrategy,
     collectionStrategy: RobotStrategy,
+    name?: string,
   ) {
     this.id = id;
     this.x = x;
@@ -75,6 +77,7 @@ export class Robot {
     this.team = team;
     this.scoringStrategy = scoringStrategy;
     this.collectionStrategy = collectionStrategy;
+    this.name = name || id;
   }
 
   setMode(mode: "SCORING" | "COLLECTING") {

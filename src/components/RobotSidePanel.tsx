@@ -16,7 +16,8 @@ export const RobotSidePanel: React.FC<RobotSidePanelProps> = ({ engine }) => {
             className={`robot-info-card team-${r.team.toLowerCase()}`}
           >
             <div className="info-card-header">
-              <span className="robot-id">{r.id}</span>
+              <span className="robot-name">{r.name}</span>
+              <span className="robot-id">#{r.id}</span>
               <span className="strategy-tag">{r.currentStrategy.name}</span>
             </div>
             <div className="robot-pos">

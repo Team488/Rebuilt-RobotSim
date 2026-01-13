@@ -22,6 +22,7 @@ const TEAM_STORAGE_KEY = "saved_team_configs_v1";
 
 interface RobotConfig {
   id: string;
+  name: string;
   scoringStrategy: string;
   collectionStrategy: string;
   moveSpeed: number;
@@ -88,9 +89,9 @@ export class Engine {
       const startX = pos.x;
       const startY = pos.y;
       const id = `${team === TEAM_RED ? "R" : "B"}${i + 1}`;
+      const defaultName = `${team === TEAM_RED ? "Red" : "Blue"} ${i + 1}`;
 
       // Create robot with default strategies and default values from Robot class
-      // Note: Robot class defaults (moveSpeed=0.5, maxBalls=3, etc.) will be used
       const robot = new Robot(
         id,
         startX,
@@ -98,6 +99,7 @@ export class Engine {
         team,
         new BasicScoringStrategy(),
         new BasicCollectorNoShootStrategy(),
+        defaultName,
       );
 
       // Priority 1: Preserve from current session if requested
@@ -135,6 +137,7 @@ export class Engine {
             robot.accuracyMin = config.accuracyMin;
           if (config.accuracyMax !== undefined)
             robot.accuracyMax = config.accuracyMax;
+          if (config.name) robot.name = config.name;
         }
       }
 
@@ -146,6 +149,7 @@ export class Engine {
     try {
       const configs: RobotConfig[] = this.robots.map((r) => ({
         id: r.id,
+        name: r.name,
         scoringStrategy: r.scoringStrategy.id,
         collectionStrategy: r.collectionStrategy.id,
         moveSpeed: r.moveSpeed,
@@ -174,6 +178,7 @@ export class Engine {
   getRobotConfig(robot: Robot): RobotConfig {
     return {
       id: robot.id,
+      name: robot.name,
       scoringStrategy: robot.scoringStrategy.id,
       collectionStrategy: robot.collectionStrategy.id,
       moveSpeed: robot.moveSpeed,
@@ -206,6 +211,7 @@ export class Engine {
       robot.accuracyMin = config.accuracyMin;
     if (config.accuracyMax !== undefined)
       robot.accuracyMax = config.accuracyMax;
+    if (config.name) robot.name = config.name;
   }
 
   getSavedTeams(): { name: string; robots: RobotConfig[] }[] {
