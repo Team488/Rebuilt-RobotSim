@@ -44,7 +44,7 @@ export class Engine {
   robots: Robot[];
   time: number = 0;
   isRunning: boolean = false;
-  intervalId: number | null = null;
+
   playbackSpeed: number = 1.0;
   onTick: ((engine: Engine) => void) | null = null;
   onGameEnd: ((result: GameResult) => void) | null = null;
@@ -280,40 +280,62 @@ export class Engine {
   }
 
 
+  private lastTime: number = 0;
+  private accumulator: number = 0;
+  private animationFrameId: number | null = null;
+
   start() {
     if (this.isRunning) return;
     this.isRunning = true;
 
-    // We'll use a fixed interval of 10ms for smooth simulation scaling
-    // and run multiple ticks if needed.
-    let lastTime = performance.now();
-    let accumulator = 0;
+    this.lastTime = performance.now();
+    this.accumulator = 0;
 
-    this.intervalId = window.setInterval(() => {
-      const now = performance.now();
-      const dtReal = (now - lastTime) / 1000;
-      lastTime = now;
+    const gameLoop = (currentTime: number) => {
+      if (!this.isRunning) return;
+
+      const dtReal = (currentTime - this.lastTime) / 1000;
+      this.lastTime = currentTime;
+
+      // Cap delta time to prevent spiral of death after tab regains focus
+      const cappedDt = Math.min(dtReal, 0.1); // Max 100ms worth of simulation per frame
 
       // The user wants ticks per second to scale with playbackSpeed.
       // So target ticks per real-second is BASE_TICK_RATE * playbackSpeed.
-      accumulator += dtReal * (BASE_TICK_RATE * this.playbackSpeed);
+      this.accumulator += cappedDt * (BASE_TICK_RATE * this.playbackSpeed);
 
-      while (accumulator >= 1 && this.isRunning) {
+      // Process accumulated ticks (capped to prevent freezing on slow frames)
+      const maxTicksPerFrame = BASE_TICK_RATE * 2; // Cap at 2 seconds worth of ticks
+      let ticksProcessed = 0;
+
+      while (this.accumulator >= 1 && this.isRunning && ticksProcessed < maxTicksPerFrame) {
         this.tick();
-        accumulator -= 1;
+        this.accumulator -= 1;
+        ticksProcessed++;
+      }
+
+      // If we hit the cap, reset accumulator to prevent infinite catch-up
+      if (ticksProcessed >= maxTicksPerFrame) {
+        this.accumulator = 0;
       }
 
       if (this.onTick) {
         this.onTick(this);
       }
-    }, 10);
+
+      // Schedule next frame
+      this.animationFrameId = requestAnimationFrame(gameLoop);
+    };
+
+    // Start the loop
+    this.animationFrameId = requestAnimationFrame(gameLoop);
   }
 
   stop() {
     this.isRunning = false;
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
   }
 
