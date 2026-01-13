@@ -6,7 +6,8 @@ import { LongRangeSniperStrategy } from "./strategies/LongRangeSniperStrategy";
 import { RapidCycleStrategy } from "./strategies/RapidCycleStrategy";
 import { RoadblockScoringStrategy } from "./strategies/RoadblockScoringStrategy";
 
-import { BasicCollectorStrategy } from "./strategies/BasicCollectorStrategy";
+import { BasicCollectorNoShootStrategy } from "./strategies/BasicCollectorNoShootStrategy";
+import { BasicCollectorShootStrategy } from "./strategies/BasicCollectorShootStrategy";
 import { ThiefCollectorStrategy } from "./strategies/ThiefCollectorStrategy";
 import { StagingCollectorStrategy } from "./strategies/StagingCollectorStrategy";
 import { InterceptorCollectorStrategy } from "./strategies/InterceptorCollectorStrategy";
@@ -27,7 +28,8 @@ export const ALL_ACTIVE_STRATEGIES: (new () => ActiveScoringStrategy)[] = [
 ];
 
 export const ALL_INACTIVE_STRATEGIES: (new () => InactiveScoringStrategy)[] = [
-  BasicCollectorStrategy,
+  BasicCollectorNoShootStrategy,
+  BasicCollectorShootStrategy,
   ThiefCollectorStrategy,
   StagingCollectorStrategy,
   InterceptorCollectorStrategy,

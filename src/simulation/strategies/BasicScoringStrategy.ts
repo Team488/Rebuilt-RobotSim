@@ -21,58 +21,51 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
   actionTime = 1.0;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
-    // If has ball, check if in zone to score or need to move
-    if (robot.ballCount > 0) {
-      const inZone = isInTeamZone(robot.x, robot.team);
-      const scoreLoc = getScoringLocation(field, robot.team);
+    const scoreLoc = getScoringLocation(field, robot.team);
+    if (!scoreLoc) return null;
 
-      if (scoreLoc) {
-        if (inZone) {
-          // If in zone and within shooting range, stop moving to avoid overshooting
-          const dx = scoreLoc.x + 0.5 - robot.x;
-          const dy = scoreLoc.y + 0.5 - robot.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+    const goalPos = { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 };
 
-          if (dist <= robot.maxShootDistance * 0.9) {
-            this.status = "Aiming for goal";
-            return null;
-          }
-
-          // In zone: Go to Goal
-          this.status = "Positioning for shot";
-          return getPathTarget(field, robot, {
-            x: scoreLoc.x + 0.5,
-            y: scoreLoc.y + 0.5,
-          });
-        } else {
-          this.status = "Returning to zone";
-          // Not in zone: Must move into zone
-          // For Red: x < FIELD_WIDTH / 3. For Blue: x >= 2 * FIELD_WIDTH / 3.
-          const safeZoneX =
-            robot.team === "RED"
-              ? Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT) - 0.5
-              : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1.5;
-          return getPathTarget(field, robot, { x: safeZoneX, y: robot.y }); // Move towards zone boundary
-        }
+    // Fill tank first
+    if (robot.ballCount < robot.maxBalls) {
+      this.status = `Filling tank (${robot.ballCount}/${robot.maxBalls})`;
+      const { ball: bestBall } = findBestEVBall(
+        field,
+        robot,
+        goalPos,
+        EV_SCORED,
+      );
+      if (bestBall) {
+        return getPathTarget(field, robot, bestBall);
       }
     }
 
-    // Else, find ball to reload
-    const scoreLoc = getScoringLocation(field, robot.team);
-    const targetPos = scoreLoc
-      ? { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 }
-      : { x: robot.x, y: robot.y };
+    // If tank is full or no balls found, go score
+    if (robot.ballCount > 0) {
+      const inZone = isInTeamZone(robot.x, robot.team);
 
-    const { ball: bestBall } = findBestEVBall(
-      field,
-      robot,
-      targetPos,
-      EV_SCORED,
-    );
-    if (bestBall) {
-      this.status = "Foraging for balls";
-      return getPathTarget(field, robot, bestBall);
+      if (inZone) {
+        const dx = goalPos.x - robot.x;
+        const dy = goalPos.y - robot.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= robot.maxShootDistance * 0.9) {
+          this.status = "In range, scoring...";
+          return null;
+        }
+
+        this.status = "Positioning for shot";
+        return getPathTarget(field, robot, goalPos);
+      } else {
+        this.status = "Returning to zone to score";
+        const safeZoneX =
+          robot.team === "RED"
+            ? Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT) - 0.5
+            : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1.5;
+        return getPathTarget(field, robot, { x: safeZoneX, y: robot.y });
+      }
     }
+
     this.status = "Idle";
     return null;
   }

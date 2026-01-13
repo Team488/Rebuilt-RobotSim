@@ -1,7 +1,7 @@
 import { Field, StartingField } from "./Field";
 import { Robot } from "./Robot";
 import { BasicScoringStrategy } from "./strategies/BasicScoringStrategy";
-import { BasicCollectorStrategy } from "./strategies/BasicCollectorStrategy";
+import { BasicCollectorNoShootStrategy } from "./strategies/BasicCollectorNoShootStrategy";
 import {
   BASE_TICK_RATE,
   SECONDS_PER_TICK,
@@ -97,7 +97,7 @@ export class Engine {
         startY,
         team,
         new BasicScoringStrategy(),
-        new BasicCollectorStrategy(),
+        new BasicCollectorNoShootStrategy(),
       );
 
       // Priority 1: Preserve from current session if requested
