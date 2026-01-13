@@ -11,6 +11,8 @@ interface ControlPanelProps {
   onUpdate: () => void;
   playAgain: boolean;
   setPlayAgain: (val: boolean) => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -22,6 +24,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onUpdate,
   playAgain,
   setPlayAgain,
+  isDarkMode,
+  onToggleDarkMode,
 }) => {
   const isFinished = engine.time >= GAME_DURATION;
 
@@ -93,6 +97,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             title="Automatically restart when the game ends"
           >
             {playAgain ? "🔄 Play Again: ON" : "🔄 Play Again: OFF"}
+          </button>
+
+          <button
+            className="theme-toggle speed-btn"
+            onClick={onToggleDarkMode}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            style={{ fontSize: '1.2rem', padding: '0 8px' }}
+          >
+            {isDarkMode ? "☀️" : "🌙"}
           </button>
         </div>
 

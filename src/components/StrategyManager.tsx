@@ -144,9 +144,10 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                             {/* Strategy Selection Row */}
                             <div className="params-row">
                                 <div className="input-group">
-                                    <label>Active Strat</label>
+                                    <label title={robot.scoringStrategy.description}>Active Strat ⓘ</label>
                                     <select
                                         value={robot.scoringStrategy.id}
+                                        title={robot.scoringStrategy.description}
                                         onChange={(e) => {
                                             const StratClass = ALL_ACTIVE_STRATEGIES.find(
                                                 (S) => new S().id === e.target.value,
@@ -159,7 +160,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                         }}
                                     >
                                         {activeOptions.map((opt) => (
-                                            <option key={opt.id} value={opt.id}>
+                                            <option key={opt.id} value={opt.id} title={opt.description}>
                                                 {opt.name}
                                             </option>
                                         ))}
@@ -167,9 +168,10 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                 </div>
 
                                 <div className="input-group">
-                                    <label>Inactive Strat</label>
+                                    <label title={robot.collectionStrategy.description}>Inactive Strat ⓘ</label>
                                     <select
                                         value={robot.collectionStrategy.id}
+                                        title={robot.collectionStrategy.description}
                                         onChange={(e) => {
                                             const StratClass = ALL_INACTIVE_STRATEGIES.find(
                                                 (S) => new S().id === e.target.value,
@@ -182,7 +184,7 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                         }}
                                     >
                                         {inactiveOptions.map((opt) => (
-                                            <option key={opt.id} value={opt.id}>
+                                            <option key={opt.id} value={opt.id} title={opt.description}>
                                                 {opt.name}
                                             </option>
                                         ))}

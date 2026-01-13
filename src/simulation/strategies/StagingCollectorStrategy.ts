@@ -12,7 +12,8 @@ import {
 export class StagingCollectorStrategy extends InactiveScoringStrategy {
   id = "staging_collector";
   name = "Staging Collector";
-  actionTime = 0.6;
+  actionTime = 0.5;
+  description = "Collects balls and drops them off in a pile just outside the home zone for easier retrieval.";
   isDelivering = false;
   patience = 0;
 

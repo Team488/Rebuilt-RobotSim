@@ -11,7 +11,8 @@ import {
 export class RapidCycleStrategy extends ActiveScoringStrategy {
     id = "rapid_cycle";
     name = "Rapid Cycle";
-    actionTime = 0.3;
+    actionTime = 0.5;
+    description = "Collects only 1-2 balls and scores them immediately to keep the scoring pressure high.";
 
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         if (robot.ballCount >= 1) {

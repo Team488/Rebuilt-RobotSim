@@ -23,6 +23,20 @@ function App() {
 
   const [leftOpen, setLeftOpen] = useState(window.innerWidth > 1024);
   const [rightOpen, setRightOpen] = useState(window.innerWidth > 1024);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem("dark_mode");
+    if (saved !== null) return saved === "true";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark-mode");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+    }
+    localStorage.setItem("dark_mode", isDarkMode.toString());
+  }, [isDarkMode]);
 
   // Close sidebars on mobile when clicking outside
   const closeSidebars = () => {
@@ -164,6 +178,8 @@ function App() {
             onUpdate={forceUpdate}
             playAgain={playAgain}
             setPlayAgain={setPlayAgain}
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
           />
 
           <div className="strategy-manager-container">

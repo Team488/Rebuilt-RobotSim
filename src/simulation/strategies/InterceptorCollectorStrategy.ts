@@ -11,7 +11,8 @@ import {
 export class InterceptorCollectorStrategy extends InactiveScoringStrategy {
   id = "interceptor_collector";
   name = "Neutral Interceptor";
-  actionTime = 0.4;
+  actionTime = 0.5;
+  description = "Prioritizes balls that are near the center line to prevent them from reaching the opponent's side.";
   isDelivering = false;
   patience = 0;
 

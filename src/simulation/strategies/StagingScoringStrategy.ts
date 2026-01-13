@@ -13,7 +13,8 @@ import {
 export class StagingScoringStrategy extends ActiveScoringStrategy {
   id = "staging_scoring";
   name = "Staging Scoring";
-  actionTime = 0.8;
+  actionTime = 1.0;
+  description = "Collects balls and positions itself at a 'sweet spot' distance before scoring rapidly.";
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount > 0) {
