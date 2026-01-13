@@ -13,6 +13,7 @@ export interface RobotStrategy {
   name: string;
   status: string;
   actionTime: number; // Seconds
+  description: string;
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null;
   decideAction(robot: Robot, field: Field): Action | null;
@@ -23,6 +24,7 @@ export abstract class BaseStrategy implements RobotStrategy {
   abstract name: string;
   status: string = "";
   abstract actionTime: number;
+  abstract description: string;
 
   abstract decideMove(
     robot: Robot,

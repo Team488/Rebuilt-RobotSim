@@ -16,6 +16,7 @@ export class RoadblockScoringStrategy extends ActiveScoringStrategy {
     id = "roadblock_scoring";
     name = "Roadblock Scorer";
     actionTime = 1.0;
+    description = "Positions itself in front of the goal and attempts to catch incoming balls to score.";
     private roadblockTicks = 0;
     private maxRoadblockTicks = 60; // ~3 seconds at 20Hz (BASE_TICK_RATE)
 

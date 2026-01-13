@@ -14,6 +14,7 @@ export class BasicCollectorNoShootStrategy extends InactiveScoringStrategy {
     id = "basic_collector_no_shoot";
     name = "Basic Collector (No Shoot)";
     actionTime = 0.5;
+    description = "Pure collection. Gathers balls and brings them back to the home zone for others to score.";
 
     private isDelivering = false;
 
