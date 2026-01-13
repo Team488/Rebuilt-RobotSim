@@ -185,7 +185,7 @@ function App() {
       </div>
 
       <div className="main-content">
-        <main className="main-scroll-area">
+        <div className="game-header-section">
           <div
             className="field-container"
             style={{
@@ -225,7 +225,9 @@ function App() {
             isDarkMode={isDarkMode}
             onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
           />
+        </div>
 
+        <main className="main-scroll-area">
           <div className="strategy-manager-container">
             <StrategyManager
               engine={engineRef.current}

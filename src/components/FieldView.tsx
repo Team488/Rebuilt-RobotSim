@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Engine } from "../simulation/Engine";
 import { FieldTile } from "../simulation/GameConst";
 import { FIELD_WIDTH, FIELD_HEIGHT } from "../simulation/GameConst";
@@ -9,10 +9,32 @@ interface FieldViewProps {
 
 export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
 
   // Scale factor: Tiles to Pixels
   // Field is 100x60. Let's aim for ~1200px width. 1200/100 = 12.
   const SCALE = 12;
+
+  // Intersection Observer to detect when canvas is visible
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(canvas);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const render = () => {
@@ -169,7 +191,7 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
 
     render();
     // Hook into animation frame if needed or rely on parent updates
-  }, [engine, engine.time]); // dependence on engine.time triggers re-render if parent updates prop
+  }, [engine, engine.time, isVisible]); // dependence on isVisible triggers re-render when scrolling back
 
   return (
     <canvas
