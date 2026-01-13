@@ -24,13 +24,13 @@ export class BasicCollectorShootStrategy extends InactiveScoringStrategy {
         // Fill tank first
         if (robot.ballCount < robot.maxBalls) {
             this.status = `Filling tank (${robot.ballCount}/${robot.maxBalls})`;
-            const { ball: bestBall } = findBestEVBall(
+            const { ball: bestBall, maxScore } = findBestEVBall(
                 field,
                 robot,
                 goalPos,
                 targetEV,
             );
-            if (bestBall) {
+            if (bestBall && maxScore > 0) {
                 return getPathTarget(field, robot, bestBall);
             }
         }
