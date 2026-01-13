@@ -12,6 +12,7 @@ export class ChaosSniperStrategy extends InactiveScoringStrategy {
     id = "chaos_sniper";
     name = "Chaos Sniper";
     actionTime = 0.6;
+    description = "Shoots balls randomly from any position, aiming to disrupt the field layout and deny opponents.";
 
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         if (robot.ballCount >= 1) {

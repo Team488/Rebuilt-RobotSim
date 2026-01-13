@@ -12,6 +12,7 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
     id = "bully_collector";
     name = "Bully Collector";
     actionTime = 0.5;
+    description = "Prioritizes collecting balls that are near opponent robots to disrupt their paths.";
     isDelivering = false;
     patience = 0;
 

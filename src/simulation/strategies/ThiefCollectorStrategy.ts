@@ -13,6 +13,7 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
   id = "thief_collector";
   name = "Opponent Thief";
   actionTime = 0.5;
+  description = "Specifically targets balls deep in the opponent's zone to deny them scoring opportunities.";
   isDelivering = false;
   patience = 0;
 

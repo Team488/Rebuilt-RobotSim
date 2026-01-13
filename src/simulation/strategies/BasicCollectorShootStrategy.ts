@@ -13,6 +13,7 @@ export class BasicCollectorShootStrategy extends InactiveScoringStrategy {
     id = "basic_collector_shoot";
     name = "Basic Collector (Shoot)";
     actionTime = 0.5;
+    description = "Collects balls and periodically shoots them towards the home zone to clear space.";
 
     private isDelivering = false;
 

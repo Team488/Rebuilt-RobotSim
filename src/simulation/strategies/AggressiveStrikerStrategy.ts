@@ -14,6 +14,7 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
   id = "aggressive_striker";
   name = "Aggressive Striker";
   actionTime = 0.5; // Very aggressive/fast
+  description = "Rushes deep into enemy territory to pull balls back or score quickly. Fast and reckless.";
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount >= robot.maxBalls) {
