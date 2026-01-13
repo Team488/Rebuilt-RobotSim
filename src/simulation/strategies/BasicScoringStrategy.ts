@@ -10,7 +10,6 @@ import {
 import {
   findBestEVBall,
   getScoringLocation,
-
   isInTeamZone,
 } from "../StrategyUtils";
 
@@ -18,7 +17,8 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
   id = "basic_scoring";
   name = "Basic Scoring";
   actionTime = 1.0;
-  description = "Collects balls until full, then returns to the home zone to score. Shoots immediately if already in the zone.";
+  description =
+    "Collects balls until full, then returns to the home zone to score. Shoots immediately if already in the zone.";
 
   private isScoring = false;
 
@@ -49,7 +49,7 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
         undefined,
         undefined,
         undefined,
-        "ABSOLUTE"
+        "ABSOLUTE",
       );
       if (bestBall) {
         return bestBall;

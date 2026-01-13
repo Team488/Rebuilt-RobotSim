@@ -18,7 +18,8 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
   id = "home_zone_scoring";
   name = "Home Zone Specialist";
   actionTime = 1.0;
-  description = "Prefers to stay in the home zone and shoot balls that appear nearby. Reliable but limited range.";
+  description =
+    "Prefers to stay in the home zone and shoot balls that appear nearby. Reliable but limited range.";
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount > 0) {
@@ -60,7 +61,7 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
       undefined,
       undefined,
       (_, c) => isInTeamZone(c + 0.5, robot.team),
-      "ABSOLUTE"
+      "ABSOLUTE",
     );
 
     if (bestBall) {

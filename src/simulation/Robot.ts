@@ -33,8 +33,8 @@ export abstract class BaseStrategy implements RobotStrategy {
   abstract decideAction(robot: Robot, field: Field): Action | null;
 }
 
-export abstract class ActiveScoringStrategy extends BaseStrategy { }
-export abstract class InactiveScoringStrategy extends BaseStrategy { }
+export abstract class ActiveScoringStrategy extends BaseStrategy {}
+export abstract class InactiveScoringStrategy extends BaseStrategy {}
 
 export class Robot {
   id: string;
@@ -45,7 +45,7 @@ export class Robot {
   maxBalls: number = 5;
   moveSpeed: number = 20 / BASE_TICK_RATE;
   shotCooldown: number = 0;
-  baseShotCooldown: number = 1 / 4 * BASE_TICK_RATE;
+  baseShotCooldown: number = (1 / 4) * BASE_TICK_RATE;
   maxShootDistance: number = 100;
   accuracyMin: number = 0.3;
   accuracyMax: number = 0.9;
@@ -116,13 +116,28 @@ export class Robot {
 
     const isStuck = this.stuckTicks > 10;
 
-    if (targetChanged || isStuck || !this.cachedPath || this.cachedPath.length === 0) {
+    if (
+      targetChanged ||
+      isStuck ||
+      !this.cachedPath ||
+      this.cachedPath.length === 0
+    ) {
       // 1. Try standard pathfinding (avoiding walls AND robots)
-      let path = AStar.findPath(field, { x: this.x, y: this.y }, target, this.id);
+      let path = AStar.findPath(
+        field,
+        { x: this.x, y: this.y },
+        target,
+        this.id,
+      );
 
       // 2. Fallback: Try path avoiding ONLY walls if blocked by robots
       if (!path) {
-        path = AStar.findPath(field, { x: this.x, y: this.y }, target, "IGNORE_ALL_ROBOTS");
+        path = AStar.findPath(
+          field,
+          { x: this.x, y: this.y },
+          target,
+          "IGNORE_ALL_ROBOTS",
+        );
       }
 
       if (path && path.length > 1) {
@@ -139,7 +154,11 @@ export class Robot {
 
     let remainingMove = this.moveSpeed;
 
-    while (remainingMove > 0.001 && this.cachedPath && this.cachedPath.length > 0) {
+    while (
+      remainingMove > 0.001 &&
+      this.cachedPath &&
+      this.cachedPath.length > 0
+    ) {
       const nextPoint = this.cachedPath[0];
       const dx = nextPoint.x - this.x;
       const dy = nextPoint.y - this.y;

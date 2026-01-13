@@ -2,16 +2,14 @@ import { Robot, InactiveScoringStrategy } from "../Robot";
 import type { Action } from "../Robot";
 import { Field } from "../Field";
 import { FieldTile, FIELD_WIDTH, FIELD_HEIGHT } from "../GameConst";
-import {
-  findBestEVBall,
-  getStagingLocation,
-} from "../StrategyUtils";
+import { findBestEVBall, getStagingLocation } from "../StrategyUtils";
 
 export class InterceptorCollectorStrategy extends InactiveScoringStrategy {
   id = "interceptor_collector";
   name = "Neutral Interceptor";
   actionTime = 0.5;
-  description = "Prioritizes balls that are near the center line to prevent them from reaching the opponent's side.";
+  description =
+    "Prioritizes balls that are near the center line to prevent them from reaching the opponent's side.";
   isDelivering = false;
   patience = 0;
 
@@ -60,7 +58,10 @@ export class InterceptorCollectorStrategy extends InactiveScoringStrategy {
       // Patrol the center line with some vertical variance
       const centerX = FIELD_WIDTH / 2;
       const targetY = robot.y + (Math.random() - 0.5) * 10;
-      return { x: centerX, y: Math.max(1, Math.min(FIELD_HEIGHT - 2, targetY)) };
+      return {
+        x: centerX,
+        y: Math.max(1, Math.min(FIELD_HEIGHT - 2, targetY)),
+      };
     }
 
     this.status = "Patrolling the midline";

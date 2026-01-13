@@ -12,7 +12,8 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
   id = "staging_collector";
   name = "Staging Collector";
   actionTime = 0.5;
-  description = "Collects balls and drops them off in a pile just outside the home zone for easier retrieval.";
+  description =
+    "Collects balls and drops them off in a pile just outside the home zone for easier retrieval.";
   isDelivering = false;
   patience = 0;
 
@@ -82,7 +83,10 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
         // If close to staging or IN range to shoot it there
         if (dist <= robot.maxShootDistance && dist > 2.0) {
           // Check if the target tile is actually empty before shooting
-          if (field.getTileAt(stagingLoc.x + 0.5, stagingLoc.y + 0.5) === FieldTile.EMPTY) {
+          if (
+            field.getTileAt(stagingLoc.x + 0.5, stagingLoc.y + 0.5) ===
+            FieldTile.EMPTY
+          ) {
             return {
               type: "SHOOT",
               distance: dist,

@@ -137,7 +137,8 @@ export class Engine {
           );
           if (InactiveClass) robot.collectionStrategy = new InactiveClass();
 
-          if (config.moveSpeed !== undefined) robot.moveSpeed = config.moveSpeed;
+          if (config.moveSpeed !== undefined)
+            robot.moveSpeed = config.moveSpeed;
           if (config.maxBalls !== undefined) robot.maxBalls = config.maxBalls;
           if (config.baseShotCooldown !== undefined)
             robot.baseShotCooldown = config.baseShotCooldown;
@@ -147,7 +148,8 @@ export class Engine {
             robot.accuracyMin = config.accuracyMin;
           if (config.accuracyMax !== undefined)
             robot.accuracyMax = config.accuracyMax;
-          if (config.name && isCustomName(config.name)) robot.name = config.name;
+          if (config.name && isCustomName(config.name))
+            robot.name = config.name;
         }
       }
 
@@ -294,10 +296,13 @@ export class Engine {
   }
 
   saveTeamNames() {
-    localStorage.setItem(TEAM_NAMES_STORAGE_KEY, JSON.stringify({
-      red: this.redTeamName,
-      blue: this.blueTeamName
-    }));
+    localStorage.setItem(
+      TEAM_NAMES_STORAGE_KEY,
+      JSON.stringify({
+        red: this.redTeamName,
+        blue: this.blueTeamName,
+      }),
+    );
   }
 
   loadTeamNames() {
@@ -322,8 +327,10 @@ export class Engine {
   importTeams(newTeams: { name: string; robots: RobotConfig[] }[]) {
     const savedTeams = this.getSavedTeams();
 
-    newTeams.forEach(newTeam => {
-      const existingIndex = savedTeams.findIndex(t => t.name === newTeam.name);
+    newTeams.forEach((newTeam) => {
+      const existingIndex = savedTeams.findIndex(
+        (t) => t.name === newTeam.name,
+      );
       if (existingIndex >= 0) {
         savedTeams[existingIndex] = newTeam;
       } else {
@@ -333,7 +340,6 @@ export class Engine {
 
     localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(savedTeams));
   }
-
 
   private lastTime: number = 0;
   private accumulator: number = 0;
@@ -363,7 +369,11 @@ export class Engine {
       const maxTicksPerFrame = BASE_TICK_RATE * 2; // Cap at 2 seconds worth of ticks
       let ticksProcessed = 0;
 
-      while (this.accumulator >= 1 && this.isRunning && ticksProcessed < maxTicksPerFrame) {
+      while (
+        this.accumulator >= 1 &&
+        this.isRunning &&
+        ticksProcessed < maxTicksPerFrame
+      ) {
         this.tick();
         this.accumulator -= 1;
         ticksProcessed++;
@@ -457,7 +467,11 @@ export class Engine {
 
         if (scoringLoc) {
           // Check if shot originated from team's zone
-          const validOrigin = isInTeamZone(ball.originX, scoringLoc.team, this.field);
+          const validOrigin = isInTeamZone(
+            ball.originX,
+            scoringLoc.team,
+            this.field,
+          );
 
           if (scoringLoc.active && validOrigin) {
             // SCORING LOGIC
@@ -525,8 +539,13 @@ export class Engine {
           const angle = action.angle;
 
           // Calculate Accuracy Percentage (Lerp)
-          const distRatio = Math.min(Math.max(dist / robot.maxShootDistance, 0), 1);
-          const percentage = robot.accuracyMax - distRatio * (robot.accuracyMax - robot.accuracyMin);
+          const distRatio = Math.min(
+            Math.max(dist / robot.maxShootDistance, 0),
+            1,
+          );
+          const percentage =
+            robot.accuracyMax -
+            distRatio * (robot.accuracyMax - robot.accuracyMin);
 
           // Continuous spread based on accuracy
           const spread = (1 - percentage) * 2.0;
@@ -537,7 +556,9 @@ export class Engine {
           let targetY = robot.y + Math.sin(angle) * dist + rg2 * spread;
 
           if (isNaN(targetX) || isNaN(targetY)) {
-            console.error(`Shooting Error: Invalid target. Defaulting to perfect shot.`);
+            console.error(
+              `Shooting Error: Invalid target. Defaulting to perfect shot.`,
+            );
             targetX = robot.x + Math.cos(angle) * dist;
             targetY = robot.y + Math.sin(angle) * dist;
           }
@@ -565,7 +586,6 @@ export class Engine {
         }
       }
     });
-
   }
 
   updateRobotModes() {

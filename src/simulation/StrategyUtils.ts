@@ -15,7 +15,6 @@ import type { Team } from "./GameConst";
 import type { Field } from "./Field";
 import type { Robot } from "./Robot";
 
-
 export function getBallEV(
   x: number,
   y: number,
@@ -103,7 +102,9 @@ export function calculateSelectionScore(
 
   const dxToTarget = target.x - ball.x;
   const dyToTarget = target.y - ball.y;
-  const distToTarget = Math.sqrt(dxToTarget * dxToTarget + dyToTarget * dyToTarget);
+  const distToTarget = Math.sqrt(
+    dxToTarget * dxToTarget + dyToTarget * dyToTarget,
+  );
 
   // Total distance cost
   const totalDist = distToBall + distToTarget;
@@ -154,7 +155,11 @@ export function findBestEVBall(
   targetEV?: number,
   filterFn?: (r: number, c: number) => boolean,
   mode: "GAIN" | "ABSOLUTE" = "GAIN",
-): { ball: { x: number; y: number } | null; ballsOnField: number; maxScore: number } {
+): {
+  ball: { x: number; y: number } | null;
+  ballsOnField: number;
+  maxScore: number;
+} {
   let bestBall: { x: number; y: number } | null = null;
   let maxScore = -Infinity;
   let ballsOnField = 0;
@@ -240,7 +245,9 @@ export function getCollectionVector(
 
     const dxToStaging = stagingLoc.x - ballX;
     const dyToStaging = stagingLoc.y - ballY;
-    const distToStaging = Math.sqrt(dxToStaging * dxToStaging + dyToStaging * dyToStaging);
+    const distToStaging = Math.sqrt(
+      dxToStaging * dxToStaging + dyToStaging * dyToStaging,
+    );
     const totalDist = distToBall + distToStaging;
 
     if (totalDist < 0.001) return;
@@ -308,8 +315,6 @@ export function findNearestEmptyTile(
   return nearestEmpty;
 }
 
-
-
 export function calculateHeading(
   from: { x: number; y: number },
   to: { x: number; y: number },
@@ -319,10 +324,14 @@ export function calculateHeading(
 
 export function isInTeamZone(x: number, team: Team, field?: Field): boolean {
   if (team === TEAM_RED) {
-    const boundary = field ? field.leftBoundaryX : Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT);
+    const boundary = field
+      ? field.leftBoundaryX
+      : Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT);
     return x < boundary;
   } else {
-    const boundary = field ? field.rightBoundaryX : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT);
+    const boundary = field
+      ? field.rightBoundaryX
+      : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT);
     return x >= boundary + 1;
   }
 }

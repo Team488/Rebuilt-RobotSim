@@ -69,7 +69,8 @@ class MinHeap {
       if (child2N < length) {
         const child2 = this.content[child2N];
         const child2Score = child2.f;
-        if (child2Score < (swap === null ? elemScore : child1Score)) swap = child2N;
+        if (child2Score < (swap === null ? elemScore : child1Score))
+          swap = child2N;
       }
 
       if (swap === null) break;
@@ -114,9 +115,21 @@ export class AStar {
     const ignoreAll = robotIdToIgnore === "IGNORE_ALL_ROBOTS";
 
     // Bounds check
-    if (!field.isPassable(targetY, targetX, ignoreAll, ignoreAll ? undefined : robotIdToIgnore)) {
+    if (
+      !field.isPassable(
+        targetY,
+        targetX,
+        ignoreAll,
+        ignoreAll ? undefined : robotIdToIgnore,
+      )
+    ) {
       // If target is an obstacle, try to find nearest valid tile
-      const nearest = this.findNearestValidTile(field, targetX, targetY, robotIdToIgnore);
+      const nearest = this.findNearestValidTile(
+        field,
+        targetX,
+        targetY,
+        robotIdToIgnore,
+      );
       if (!nearest) return null;
       return this.findPath(field, start, nearest, robotIdToIgnore);
     }
@@ -155,15 +168,35 @@ export class AStar {
         const ny = current.y + dy;
 
         // Skip if out of bounds (implicit in isPassable but cheaper to check basic range if needed, though isPassable handles it)
-        if (!field.isPassable(ny, nx, ignoreAll, ignoreAll ? undefined : robotIdToIgnore)) continue;
+        if (
+          !field.isPassable(
+            ny,
+            nx,
+            ignoreAll,
+            ignoreAll ? undefined : robotIdToIgnore,
+          )
+        )
+          continue;
 
         const neighborKey = ny * fieldWidth + nx;
         if (closedSet.has(neighborKey)) continue;
 
         // Diagonal squeeze check
         if (cost > 1) {
-          if (!field.isPassable(current.y, nx, ignoreAll, ignoreAll ? undefined : robotIdToIgnore) ||
-            !field.isPassable(ny, current.x, ignoreAll, ignoreAll ? undefined : robotIdToIgnore)) {
+          if (
+            !field.isPassable(
+              current.y,
+              nx,
+              ignoreAll,
+              ignoreAll ? undefined : robotIdToIgnore,
+            ) ||
+            !field.isPassable(
+              ny,
+              current.x,
+              ignoreAll,
+              ignoreAll ? undefined : robotIdToIgnore,
+            )
+          ) {
             continue;
           }
         }
@@ -249,7 +282,8 @@ export class AStar {
       ];
 
       for (const n of neighbors) {
-        if (n.x < 0 || n.x >= field.width || n.y < 0 || n.y >= field.height) continue;
+        if (n.x < 0 || n.x >= field.width || n.y < 0 || n.y >= field.height)
+          continue;
         const key = n.y * field.width + n.x;
         if (!visited.has(key)) {
           visited.add(key);

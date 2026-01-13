@@ -8,12 +8,12 @@ import {
   isInTeamZone,
 } from "../StrategyUtils";
 
-
 export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
   id = "aggressive_striker";
   name = "Aggressive Striker";
   actionTime = 0.5; // Very aggressive/fast
-  description = "Rushes deep into enemy territory to pull balls back or score quickly. Fast and reckless.";
+  description =
+    "Rushes deep into enemy territory to pull balls back or score quickly. Fast and reckless.";
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount >= robot.maxBalls) {
@@ -37,7 +37,7 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
         // Ball is NOT in our zone
         return !isInTeamZone(c + 0.5, robot.team);
       },
-      "ABSOLUTE"
+      "ABSOLUTE",
     );
 
     if (deepBall) {
@@ -45,7 +45,14 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
       return deepBall;
     }
 
-    const { ball: anyBall } = findBestEVBall(field, robot, undefined, undefined, undefined, "ABSOLUTE");
+    const { ball: anyBall } = findBestEVBall(
+      field,
+      robot,
+      undefined,
+      undefined,
+      undefined,
+      "ABSOLUTE",
+    );
     if (anyBall) {
       this.status = "Scanning for targets";
       return anyBall;

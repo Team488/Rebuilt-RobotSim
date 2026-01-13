@@ -61,7 +61,10 @@ export class Field {
     for (const robot of this.engine.robots) {
       const floorY = Math.floor(robot.y);
       const floorX = Math.floor(robot.x);
-      const roundY = Math.max(0, Math.min(this.height - 1, Math.round(robot.y)));
+      const roundY = Math.max(
+        0,
+        Math.min(this.height - 1, Math.round(robot.y)),
+      );
       const roundX = Math.max(0, Math.min(this.width - 1, Math.round(robot.x)));
 
       // Helper to add
@@ -84,7 +87,12 @@ export class Field {
     return r >= 0 && r < this.height && c >= 0 && c < this.width;
   }
 
-  isPassable(r: number, c: number, ignoreRobots: boolean = false, robotIdToIgnore?: string): boolean {
+  isPassable(
+    r: number,
+    c: number,
+    ignoreRobots: boolean = false,
+    robotIdToIgnore?: string,
+  ): boolean {
     if (!this.isValidTile(r, c)) return false;
     if (this.grid[r][c] === FieldTile.WALL) return false;
 
@@ -92,7 +100,11 @@ export class Field {
       const key = r * this.width + c;
       const robots = this.robotMap.get(key);
       if (robots) {
-        if (robotIdToIgnore && robots.length === 1 && robots[0] === robotIdToIgnore) {
+        if (
+          robotIdToIgnore &&
+          robots.length === 1 &&
+          robots[0] === robotIdToIgnore
+        ) {
           return true; // Only me
         }
         return false; // Occupied by someone else (or me + someone else)
@@ -120,8 +132,6 @@ export class Field {
     }
     return false;
   }
-
-
 
   findNearestOpenNode(x: number, y: number): { x: number; y: number } | null {
     const startC = Math.max(0, Math.min(this.width - 1, Math.floor(x)));
@@ -153,7 +163,13 @@ export class Field {
 
         for (const n of neighbors) {
           const key = n.r * this.width + n.c;
-          if (n.r >= 0 && n.r < this.height && n.c >= 0 && n.c < this.width && !visited.has(key)) {
+          if (
+            n.r >= 0 &&
+            n.r < this.height &&
+            n.c >= 0 &&
+            n.c < this.width &&
+            !visited.has(key)
+          ) {
             visited.add(key);
             queue.push(n);
           }
@@ -300,8 +316,6 @@ export class Field {
       { x: centerX, y: (2 * FIELD_HEIGHT) / 3 },
     ];
   }
-
-
 }
 
 export class StartingField extends Field {

@@ -93,7 +93,10 @@ function App() {
   // Auto-pause when window loses focus
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && engineRef.current.isRunning) {
+      if (
+        document.visibilityState === "hidden" &&
+        engineRef.current.isRunning
+      ) {
         handleStop();
       }
     };

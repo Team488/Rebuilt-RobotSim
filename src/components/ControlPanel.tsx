@@ -103,7 +103,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             className="theme-toggle speed-btn"
             onClick={onToggleDarkMode}
             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            style={{ fontSize: '1.2rem', padding: '0 8px' }}
+            style={{ fontSize: "1.2rem", padding: "0 8px" }}
           >
             {isDarkMode ? "☀️" : "🌙"}
           </button>
