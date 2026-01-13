@@ -15,6 +15,8 @@ export class BasicCollectorNoShootStrategy extends InactiveScoringStrategy {
     name = "Basic Collector (No Shoot)";
     actionTime = 0.5;
 
+    private isDelivering = false;
+
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         const scoreLoc = getScoringLocation(field, robot.team);
         if (!scoreLoc) return null;
@@ -22,8 +24,15 @@ export class BasicCollectorNoShootStrategy extends InactiveScoringStrategy {
         const goalPos = { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 };
         const targetEV = getBallEV(goalPos.x, goalPos.y, robot.team, field);
 
-        // Fill tank first
-        if (robot.ballCount < robot.maxBalls) {
+        // State machine: Deliver until empty, then collect until full
+        if (robot.ballCount >= robot.maxBalls) {
+            this.isDelivering = true;
+        } else if (robot.ballCount === 0) {
+            this.isDelivering = false;
+        }
+
+        // Mode 1: Collection
+        if (!this.isDelivering) {
             this.status = `Filling tank (${robot.ballCount}/${robot.maxBalls})`;
             const { ball: bestBall, maxScore } = findBestEVBall(
                 field,
@@ -31,14 +40,18 @@ export class BasicCollectorNoShootStrategy extends InactiveScoringStrategy {
                 goalPos,
                 targetEV,
             );
+
             if (bestBall && maxScore > 0) {
                 return getPathTarget(field, robot, bestBall);
+            } else if (robot.ballCount > 0) {
+                // If no more good balls and we have some, go deliver
+                this.isDelivering = true;
             }
         }
 
-        // If tank is full or no balls found, go deliver
-        if (robot.ballCount > 0) {
-            this.status = "Delivering balls (No Shoot)";
+        // Mode 2: Delivery
+        if (this.isDelivering && robot.ballCount > 0) {
+            this.status = `Delivering ${robot.ballCount} balls (No Shoot)`;
             const nearestEmpty = findNearestEmptyTile(
                 field,
                 { x: scoreLoc.x, y: scoreLoc.y },
@@ -59,15 +72,15 @@ export class BasicCollectorNoShootStrategy extends InactiveScoringStrategy {
         const r = Math.floor(robot.y);
         const c = Math.floor(robot.x);
 
-        // Collect if on a ball and filling tank
-        if (robot.ballCount < robot.maxBalls) {
+        // Mode 1: Collection
+        if (!this.isDelivering && robot.ballCount < robot.maxBalls) {
             if (field.getTileAt(c, r) === FieldTile.BALL) {
                 return { type: "COLLECT" };
             }
         }
 
-        // Drop if on an empty tile near goal
-        if (robot.ballCount > 0) {
+        // Mode 2: Delivery
+        if (this.isDelivering && robot.ballCount > 0) {
             const scoreLoc = getScoringLocation(field, robot.team);
             if (scoreLoc) {
                 const dx = robot.x - (scoreLoc.x + 0.5);
