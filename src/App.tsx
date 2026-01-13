@@ -187,9 +187,14 @@ function App() {
             style={{
               boxShadow: `0 10px 40px ${engineRef.current.currentScoringTeam === "RED" ? "rgba(255, 77, 79, 0.2)" : "rgba(24, 144, 255, 0.2)"}`,
               border: `4px solid ${engineRef.current.currentScoringTeam === "RED" ? "#ff4d4f" : "#1890ff"}`,
+              position: "relative",
             }}
           >
             <FieldView engine={engineRef.current} />
+            <div className={`pause-overlay ${!isRunning ? "visible" : ""}`}>
+              <div className="pause-text">PAUSED</div>
+              <div className="pause-subtext">Simulation is suspended</div>
+            </div>
           </div>
 
           <ControlPanel
