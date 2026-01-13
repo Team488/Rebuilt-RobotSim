@@ -89,6 +89,29 @@ function App() {
     };
   }, [forceUpdate]);
 
+  // Auto-pause when window loses focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && engineRef.current.isRunning) {
+        handleStop();
+      }
+    };
+
+    const handleBlur = () => {
+      if (engineRef.current.isRunning) {
+        handleStop();
+      }
+    };
+
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   const handleStart = () => {
     engineRef.current.start();
     setIsRunning(true);
