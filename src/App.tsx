@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import "./index.css";
 import { Engine, type GameResult } from "./simulation/Engine";
+import { GAME_DURATION } from "./simulation/GameConst";
 import { FieldView } from "./components/FieldView";
 import { ControlPanel } from "./components/ControlPanel";
 import { GameLog } from "./components/GameLog";
@@ -192,8 +193,14 @@ function App() {
           >
             <FieldView engine={engineRef.current} />
             <div className={`pause-overlay ${!isRunning ? "visible" : ""}`}>
-              <div className="pause-text">PAUSED</div>
-              <div className="pause-subtext">Simulation is suspended</div>
+              <div className="pause-text">
+                {engineRef.current.time >= GAME_DURATION ? "GAME FINISHED" : "PAUSED"}
+              </div>
+              <div className="pause-subtext">
+                {engineRef.current.time >= GAME_DURATION
+                  ? "The match has ended"
+                  : "Simulation is suspended"}
+              </div>
             </div>
           </div>
 
