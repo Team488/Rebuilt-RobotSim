@@ -19,6 +19,7 @@ import { ALL_ACTIVE_STRATEGIES, ALL_INACTIVE_STRATEGIES } from "./strategies";
 
 const STORAGE_KEY = "robot_configs_v1";
 const TEAM_STORAGE_KEY = "saved_team_configs_v1";
+const TEAM_NAMES_STORAGE_KEY = "team_names_v1";
 
 const isCustomName = (name: string | undefined): boolean => {
   if (!name) return false;
@@ -60,10 +61,14 @@ export class Engine {
   currentScoringTeam: Team = TEAM_BLUE; // Default start
   modeTimer: number = 0;
 
+  redTeamName: string = "Default Red";
+  blueTeamName: string = "Default Blue";
+
   constructor() {
     this.field = new StartingField();
     this.field.engine = this;
     this.robots = [];
+    this.loadTeamNames();
     this.initializeGame(false); // Initial load, don't preserve (but will load from cache)
   }
 
@@ -226,7 +231,15 @@ export class Engine {
       robot.accuracyMin = config.accuracyMin;
     if (config.accuracyMax !== undefined)
       robot.accuracyMax = config.accuracyMax;
-    if (config.name && isCustomName(config.name)) robot.name = config.name;
+
+    if (config.name && isCustomName(config.name)) {
+      robot.name = config.name;
+    } else {
+      // Set default name based on team and index-like ID
+      const teamPrefix = robot.team === TEAM_RED ? "Red" : "Blue";
+      const idNum = robot.id.substring(1);
+      robot.name = `${teamPrefix} ${idNum}`;
+    }
   }
 
   getSavedTeams(): { name: string; robots: RobotConfig[] }[] {
@@ -260,6 +273,13 @@ export class Engine {
     const teamToLoad = savedTeams.find((t) => t.name === name);
 
     if (teamToLoad) {
+      if (targetTeam === TEAM_RED) {
+        this.redTeamName = name;
+      } else {
+        this.blueTeamName = name;
+      }
+      this.saveTeamNames();
+
       const targetRobots = this.robots.filter((r) => r.team === targetTeam);
       targetRobots.forEach((robot, index) => {
         // Find config in the saved team for the corresponding robot index
@@ -270,6 +290,26 @@ export class Engine {
         }
       });
       this.saveConfigs(); // Update current session cache
+    }
+  }
+
+  saveTeamNames() {
+    localStorage.setItem(TEAM_NAMES_STORAGE_KEY, JSON.stringify({
+      red: this.redTeamName,
+      blue: this.blueTeamName
+    }));
+  }
+
+  loadTeamNames() {
+    try {
+      const stored = localStorage.getItem(TEAM_NAMES_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        this.redTeamName = parsed.red || "Default Red";
+        this.blueTeamName = parsed.blue || "Default Blue";
+      }
+    } catch (e) {
+      console.error("Failed to load team names", e);
     }
   }
 

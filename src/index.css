@@ -538,6 +538,40 @@ h4 {
   letter-spacing: -0.01em;
 }
 
+.teams-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.team-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.team-section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.team-section-title.red {
+  color: #ff4d4f;
+  border-color: rgba(255, 77, 79, 0.2);
+}
+
+.team-section-title.blue {
+  color: #1890ff;
+  border-color: rgba(24, 144, 255, 0.2);
+}
+
 .robot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1217,7 +1251,6 @@ h4 {
   text-transform: uppercase;
   letter-spacing: 0.3em;
   text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-  animation: pause-pulse 2s infinite ease-in-out;
 }
 
 .pause-subtext {
@@ -1228,16 +1261,38 @@ h4 {
   text-transform: uppercase;
 }
 
-@keyframes pause-pulse {
+/* Team Configuration Panel */
+.team-config-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
 
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.team-config-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
 
-  50% {
-    transform: scale(1.08);
-    opacity: 0.7;
-  }
+.team-config-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.team-config-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+.team-config-input::placeholder {
+  color: var(--text-muted);
 }

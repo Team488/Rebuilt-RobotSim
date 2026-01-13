@@ -194,12 +194,18 @@ function App() {
             <FieldView engine={engineRef.current} />
             <div className={`pause-overlay ${!isRunning ? "visible" : ""}`}>
               <div className="pause-text">
-                {engineRef.current.time >= GAME_DURATION ? "GAME FINISHED" : "PAUSED"}
+                {engineRef.current.time >= GAME_DURATION
+                  ? "GAME FINISHED"
+                  : engineRef.current.time === 0
+                    ? "GET STARTED"
+                    : "PAUSED"}
               </div>
               <div className="pause-subtext">
                 {engineRef.current.time >= GAME_DURATION
                   ? "The match has ended"
-                  : "Simulation is suspended"}
+                  : engineRef.current.time === 0
+                    ? "Configure robots and start the match"
+                    : "Simulation is suspended"}
               </div>
             </div>
           </div>
