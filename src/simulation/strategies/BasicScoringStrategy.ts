@@ -19,14 +19,23 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
   name = "Basic Scoring";
   actionTime = 1.0;
 
+  private isScoring = false;
+
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     const scoreLoc = getScoringLocation(field, robot.team);
     if (!scoreLoc) return null;
 
     const goalPos = { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 };
 
-    // Fill tank first
-    if (robot.ballCount < robot.maxBalls) {
+    // State machine: Score until empty, then collect until full
+    if (robot.ballCount >= robot.maxBalls) {
+      this.isScoring = true;
+    } else if (robot.ballCount === 0) {
+      this.isScoring = false;
+    }
+
+    // Mode 1: Collection
+    if (!this.isScoring) {
       this.status = `Filling tank (${robot.ballCount}/${robot.maxBalls})`;
       const { ball: bestBall } = findBestEVBall(
         field,
@@ -38,11 +47,14 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
       );
       if (bestBall) {
         return getPathTarget(field, robot, bestBall);
+      } else if (robot.ballCount > 0) {
+        // If no more balls and we have some, go score
+        this.isScoring = true;
       }
     }
 
-    // If tank is full or no balls found, go score
-    if (robot.ballCount > 0) {
+    // Mode 2: Scoring
+    if (this.isScoring && robot.ballCount > 0) {
       const inZone = isInTeamZone(robot.x, robot.team);
 
       if (inZone) {
@@ -51,7 +63,7 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist <= robot.maxShootDistance * 0.9) {
-          this.status = "In range, scoring...";
+          this.status = `In range, scoring ${robot.ballCount} balls...`;
           return null;
         }
 
@@ -72,8 +84,8 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
   }
 
   decideAction(robot: Robot, field: Field): Action | null {
-    // Shoot if has ball and IN ZONE
-    if (robot.ballCount > 0) {
+    // Mode 2: Scoring
+    if (this.isScoring && robot.ballCount > 0) {
       const targetLoc = field.scoringLocations.find(
         (sl) => sl.team === robot.team,
       );
@@ -94,8 +106,8 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
       }
     }
 
-    // Collect if empty and at ball
-    if (robot.ballCount < robot.maxBalls) {
+    // Mode 1: Collection
+    if (!this.isScoring && robot.ballCount < robot.maxBalls) {
       const r = Math.floor(robot.y);
       const c = Math.floor(robot.x);
 
