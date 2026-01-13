@@ -5,7 +5,6 @@ import { FieldTile } from "../GameConst";
 import {
   findBestEVBall,
   findNearestEmptyTile,
-  getPathTarget,
   getStagingLocation,
 } from "../StrategyUtils";
 
@@ -37,11 +36,8 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
       );
 
       if (dropPos) {
-        const target = getPathTarget(field, robot, dropPos);
-        if (target) {
-          this.patience = 0;
-          return target;
-        }
+        this.patience = 0;
+        return dropPos;
       }
     }
 
@@ -52,12 +48,9 @@ export class StagingCollectorStrategy extends InactiveScoringStrategy {
       1.0,
     );
     if (ball) {
-      const target = getPathTarget(field, robot, ball);
-      if (target) {
-        this.patience = 0;
-        this.status = "Collecting for staging";
-        return target;
-      }
+      this.patience = 0;
+      this.status = "Collecting for staging";
+      return ball;
     }
 
     // Unstick logic

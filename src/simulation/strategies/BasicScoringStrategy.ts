@@ -10,7 +10,7 @@ import {
 import {
   findBestEVBall,
   getScoringLocation,
-  getPathTarget,
+
   isInTeamZone,
 } from "../StrategyUtils";
 
@@ -39,6 +39,7 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
       this.isScoring = true;
     }
 
+    // Imports updated by subsequent chunk or manually if needed, but here we focus on the class.
     // Mode 1: Collection
     if (!this.isScoring) {
       this.status = `Filling tank (${robot.ballCount}/${robot.maxBalls})`;
@@ -51,7 +52,7 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
         "ABSOLUTE"
       );
       if (bestBall) {
-        return getPathTarget(field, robot, bestBall);
+        return bestBall;
       } else if (robot.ballCount > 0) {
         // If no more balls and we have some, go score
         this.isScoring = true;
@@ -73,14 +74,14 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
         }
 
         this.status = "Positioning for shot";
-        return getPathTarget(field, robot, goalPos);
+        return goalPos;
       } else {
         this.status = "Returning to zone to score";
         const safeZoneX =
           robot.team === "RED"
             ? Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT) - 0.5
             : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1.5;
-        return getPathTarget(field, robot, { x: safeZoneX, y: robot.y });
+        return { x: safeZoneX, y: robot.y };
       }
     }
 

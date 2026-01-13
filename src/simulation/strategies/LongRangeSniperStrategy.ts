@@ -4,7 +4,6 @@ import { Field } from "../Field";
 import { FieldTile } from "../GameConst";
 import {
     findBestEVBall,
-    getPathTarget,
     isInTeamZone,
 } from "../StrategyUtils";
 
@@ -28,7 +27,7 @@ export class LongRangeSniperStrategy extends ActiveScoringStrategy {
                 (_, c) => isInTeamZone(c + 0.5, robot.team) // Prefer home zone balls
             );
 
-            if (ball) return getPathTarget(field, robot, ball);
+            if (ball) return ball;
 
             // If no home zone balls, look everywhere
             const { ball: anyBall } = findBestEVBall(
@@ -37,7 +36,7 @@ export class LongRangeSniperStrategy extends ActiveScoringStrategy {
                 { x: goal.tileX + 0.5, y: goal.tileY + 0.5 },
                 1.0
             );
-            if (anyBall) return getPathTarget(field, robot, anyBall);
+            if (anyBall) return anyBall;
         } else {
             this.status = "Positioning for long-distance shot";
             const goal = field.scoringLocations.find((sl) => sl.team === robot.team);
@@ -59,7 +58,7 @@ export class LongRangeSniperStrategy extends ActiveScoringStrategy {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist > 1) {
-                return getPathTarget(field, robot, { x: targetX, y: targetY });
+                return { x: targetX, y: targetY };
             }
         }
 

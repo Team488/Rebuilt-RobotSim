@@ -11,7 +11,6 @@ import {
 import {
   findBestEVBall,
   getScoringLocation,
-  getPathTarget,
   isInTeamZone,
 } from "../StrategyUtils";
 
@@ -19,7 +18,7 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
   id = "home_zone_scoring";
   name = "Home Zone Specialist";
   actionTime = 1.0;
-  description = "Prefers to stay in the home zone and score balls that appear nearby. Reliable but limited range.";
+  description = "Prefers to stay in the home zone and shoot balls that appear nearby. Reliable but limited range.";
 
   decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
     if (robot.ballCount > 0) {
@@ -38,10 +37,10 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
           }
 
           this.status = "Positioning for shot";
-          return getPathTarget(field, robot, {
+          return {
             x: scoreLoc.x + 0.5,
             y: scoreLoc.y + 0.5,
-          });
+          };
         } else {
           this.status = "Returning to home zone";
           // If somehow outside, rush back
@@ -49,7 +48,7 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
             robot.team === "RED"
               ? Math.floor(FIELD_WIDTH * ZONE_RATIO_LEFT) - 0.5
               : Math.floor(FIELD_WIDTH * ZONE_RATIO_RIGHT) + 1.5;
-          return getPathTarget(field, robot, { x: safeZoneX, y: robot.y });
+          return { x: safeZoneX, y: robot.y };
         }
       }
     }
@@ -66,14 +65,14 @@ export class HomeZoneScoringStrategy extends ActiveScoringStrategy {
 
     if (bestBall) {
       this.status = "Collecting in zone";
-      return getPathTarget(field, robot, bestBall);
+      return bestBall;
     }
 
     // Default: Return to center of home zone if idle
     this.status = "Waiting for balls";
     const homeCenterX =
       robot.team === "RED" ? FIELD_WIDTH * 0.15 : FIELD_WIDTH * 0.85;
-    return getPathTarget(field, robot, { x: homeCenterX, y: FIELD_HEIGHT / 2 });
+    return { x: homeCenterX, y: FIELD_HEIGHT / 2 };
   }
 
   decideAction(robot: Robot, field: Field): Action | null {

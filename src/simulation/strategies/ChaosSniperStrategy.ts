@@ -4,7 +4,6 @@ import { Field } from "../Field";
 import { FieldTile } from "../GameConst";
 import {
     findBestEVBall,
-    getPathTarget,
     isInTeamZone,
 } from "../StrategyUtils";
 
@@ -32,7 +31,7 @@ export class ChaosSniperStrategy extends InactiveScoringStrategy {
                 2.0, // Higher weighting for balls near THEIR goal
                 (_, c) => !isInTeamZone(c + 0.5, robot.team)
             );
-            if (ball) return getPathTarget(field, robot, ball);
+            if (ball) return ball;
         }
 
         return null;

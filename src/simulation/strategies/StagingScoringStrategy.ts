@@ -6,7 +6,6 @@ import {
   findBestEVBall,
   getScoringLocation,
   getStagingLocation,
-  getPathTarget,
   isInTeamZone,
 } from "../StrategyUtils";
 
@@ -23,10 +22,10 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
         this.status = "Moving to score";
         const scoreLoc = getScoringLocation(field, robot.team);
         if (scoreLoc) {
-          return getPathTarget(field, robot, {
+          return {
             x: scoreLoc.x + 0.5,
             y: scoreLoc.y + 0.5,
-          });
+          };
         }
       }
 
@@ -34,10 +33,10 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
       const stagingLoc = getStagingLocation(field, robot.team);
       if (stagingLoc) {
         this.status = "Moving to staging";
-        return getPathTarget(field, robot, {
+        return {
           x: stagingLoc.x + 0.5,
           y: stagingLoc.y + 0.5,
-        });
+        };
       }
     }
 
@@ -51,7 +50,7 @@ export class StagingScoringStrategy extends ActiveScoringStrategy {
     );
     if (bestBall) {
       this.status = "Collecting high-value balls";
-      return getPathTarget(field, robot, bestBall);
+      return bestBall;
     }
     this.status = "Awaiting targets";
     return null;

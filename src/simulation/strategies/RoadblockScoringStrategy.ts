@@ -8,7 +8,6 @@ import {
 import {
     findBestEVBall,
     getScoringLocation,
-    getPathTarget,
     isInTeamZone,
 } from "../StrategyUtils";
 
@@ -38,17 +37,17 @@ export class RoadblockScoringStrategy extends ActiveScoringStrategy {
                     }
 
                     this.status = "Positioning for shot";
-                    return getPathTarget(field, robot, {
+                    return {
                         x: scoreLoc.x + 0.5,
                         y: scoreLoc.y + 0.5,
-                    });
+                    };
                 } else {
                     this.status = "Returning to zone";
                     const safeZoneX =
                         robot.team === "RED"
                             ? field.leftBoundaryX - 0.5
                             : field.rightBoundaryX + 1.5;
-                    return getPathTarget(field, robot, { x: safeZoneX, y: robot.y });
+                    return { x: safeZoneX, y: robot.y };
                 }
             }
         }
@@ -82,7 +81,7 @@ export class RoadblockScoringStrategy extends ActiveScoringStrategy {
                 return null; // Stay put
             } else {
                 this.status = "Moving to roadblock";
-                return getPathTarget(field, robot, targetPos);
+                return targetPos;
             }
         }
 
@@ -96,7 +95,7 @@ export class RoadblockScoringStrategy extends ActiveScoringStrategy {
         );
         if (bestBall) {
             this.status = "Foraging for balls";
-            return getPathTarget(field, robot, bestBall);
+            return bestBall;
         }
         this.status = "Idle";
         return null;

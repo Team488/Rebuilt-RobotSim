@@ -1,7 +1,6 @@
 import { Robot, InactiveScoringStrategy } from "../Robot";
 import type { Action } from "../Robot";
 import { Field } from "../Field";
-import { getPathTarget } from "../StrategyUtils";
 
 export class DefensiveInterceptorStrategy extends InactiveScoringStrategy {
     id = "defensive_interceptor";
@@ -31,14 +30,14 @@ export class DefensiveInterceptorStrategy extends InactiveScoringStrategy {
             const targetX = (dangerousOpponent.x + ourGoal.tileX + 0.5) / 2;
             const targetY = (dangerousOpponent.y + ourGoal.tileY + 0.5) / 2;
 
-            return getPathTarget(field, robot, { x: targetX, y: targetY });
+            return { x: targetX, y: targetY };
         }
 
         this.status = "Guarding territory";
         // Default to standing in front of goal
         const guardX = robot.team === "RED" ? 5 : field.grid[0].length - 5;
         const guardY = ourGoal.tileY + 0.5;
-        return getPathTarget(field, robot, { x: guardX, y: guardY });
+        return { x: guardX, y: guardY };
     }
 
     decideAction(_robot: Robot, _field: Field): Action | null {

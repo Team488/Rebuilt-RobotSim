@@ -5,7 +5,6 @@ import { FieldTile } from "../GameConst";
 import {
   findBestEVBall,
   getScoringLocation,
-  getPathTarget,
   isInTeamZone,
 } from "../StrategyUtils";
 
@@ -21,10 +20,10 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
       this.status = "Rushing to score";
       const scoreLoc = getScoringLocation(field, robot.team);
       if (scoreLoc) {
-        return getPathTarget(field, robot, {
+        return {
           x: scoreLoc.x + 0.5,
           y: scoreLoc.y + 0.5,
-        });
+        };
       }
     }
 
@@ -43,13 +42,13 @@ export class AggressiveStrikerStrategy extends ActiveScoringStrategy {
 
     if (deepBall) {
       this.status = "Hunting deep balls";
-      return getPathTarget(field, robot, deepBall);
+      return deepBall;
     }
 
     const { ball: anyBall } = findBestEVBall(field, robot, undefined, undefined, undefined, "ABSOLUTE");
     if (anyBall) {
       this.status = "Scanning for targets";
-      return getPathTarget(field, robot, anyBall);
+      return anyBall;
     }
 
     this.status = "Patrolling field";

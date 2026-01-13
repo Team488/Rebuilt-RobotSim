@@ -43,7 +43,7 @@ export class Robot {
   team: Team;
   ballCount: number = 0;
   maxBalls: number = 5;
-  moveSpeed: number = 0.5 * BASE_TICK_RATE;
+  moveSpeed: number = 20 / BASE_TICK_RATE;
   shotCooldown: number = 0;
   baseShotCooldown: number = 1 / 4 * BASE_TICK_RATE;
   maxShootDistance: number = 100;
@@ -117,7 +117,14 @@ export class Robot {
     const isStuck = this.stuckTicks > 10;
 
     if (targetChanged || isStuck || !this.cachedPath || this.cachedPath.length === 0) {
-      const path = AStar.findPath(field, { x: this.x, y: this.y }, target, this.id);
+      // 1. Try standard pathfinding (avoiding walls AND robots)
+      let path = AStar.findPath(field, { x: this.x, y: this.y }, target, this.id);
+
+      // 2. Fallback: Try path avoiding ONLY walls if blocked by robots
+      if (!path) {
+        path = AStar.findPath(field, { x: this.x, y: this.y }, target, "IGNORE_ALL_ROBOTS");
+      }
+
       if (path && path.length > 1) {
         this.cachedPath = path.slice(1); // Skip current tile
       } else {

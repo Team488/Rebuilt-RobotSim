@@ -39,6 +39,8 @@ export class Field {
   readonly leftBoundaryX: number;
   readonly rightBoundaryX: number;
 
+  robotMap: Map<number, string[]> = new Map();
+
   constructor(
     width: number = FIELD_WIDTH,
     height: number = FIELD_HEIGHT,
@@ -52,6 +54,32 @@ export class Field {
     this.scoringLocations = this.initializeScoringLocations();
   }
 
+  updateRobotMap() {
+    this.robotMap.clear();
+    if (!this.engine) return;
+
+    for (const robot of this.engine.robots) {
+      const floorY = Math.floor(robot.y);
+      const floorX = Math.floor(robot.x);
+      const roundY = Math.max(0, Math.min(this.height - 1, Math.round(robot.y)));
+      const roundX = Math.max(0, Math.min(this.width - 1, Math.round(robot.x)));
+
+      // Helper to add
+      const add = (r: number, c: number) => {
+        const key = r * this.width + c;
+        if (!this.robotMap.has(key)) {
+          this.robotMap.set(key, []);
+        }
+        this.robotMap.get(key)!.push(robot.id);
+      };
+
+      add(floorY, floorX);
+      if (floorY !== roundY || floorX !== roundX) {
+        add(roundY, roundX);
+      }
+    }
+  }
+
   isValidTile(r: number, c: number): boolean {
     return r >= 0 && r < this.height && c >= 0 && c < this.width;
   }
@@ -60,19 +88,14 @@ export class Field {
     if (!this.isValidTile(r, c)) return false;
     if (this.grid[r][c] === FieldTile.WALL) return false;
 
-    if (!ignoreRobots && this.engine) {
-      // Check if any robot is in this tile or its nearest neighbor
-      for (const robot of this.engine.robots) {
-        if (robotIdToIgnore && robot.id === robotIdToIgnore) continue;
-
-        const floorY = Math.floor(robot.y);
-        const floorX = Math.floor(robot.x);
-        const roundY = Math.max(0, Math.min(this.height - 1, Math.round(robot.y)));
-        const roundX = Math.max(0, Math.min(this.width - 1, Math.round(robot.x)));
-
-        if ((floorY === r && floorX === c) || (roundY === r && roundX === c)) {
-          return false;
+    if (!ignoreRobots) {
+      const key = r * this.width + c;
+      const robots = this.robotMap.get(key);
+      if (robots) {
+        if (robotIdToIgnore && robots.length === 1 && robots[0] === robotIdToIgnore) {
+          return true; // Only me
         }
+        return false; // Occupied by someone else (or me + someone else)
       }
     }
 
@@ -98,6 +121,47 @@ export class Field {
     return false;
   }
 
+
+
+  findNearestOpenNode(x: number, y: number): { x: number; y: number } | null {
+    const startC = Math.max(0, Math.min(this.width - 1, Math.floor(x)));
+    const startR = Math.max(0, Math.min(this.height - 1, Math.floor(y)));
+    const queue: { r: number; c: number }[] = [{ r: startR, c: startC }];
+    const visited = new Set<number>();
+    visited.add(startR * this.width + startC);
+
+    while (queue.length > 0) {
+      const { r, c } = queue.shift()!;
+
+      if (this.isValidTile(r, c)) {
+        const isScoringLocation = this.getScoringLocationAt(c, r);
+
+        if (this.grid[r][c] === FieldTile.EMPTY && !isScoringLocation) {
+          return { x: c + 0.5, y: r + 0.5 };
+        }
+
+        const neighbors = [
+          { r: r + 1, c: c },
+          { r: r - 1, c: c },
+          { r: r, c: c + 1 },
+          { r: r, c: c - 1 },
+          { r: r + 1, c: c + 1 },
+          { r: r - 1, c: c - 1 },
+          { r: r + 1, c: c - 1 },
+          { r: r - 1, c: c + 1 },
+        ];
+
+        for (const n of neighbors) {
+          const key = n.r * this.width + n.c;
+          if (n.r >= 0 && n.r < this.height && n.c >= 0 && n.c < this.width && !visited.has(key)) {
+            visited.add(key);
+            queue.push(n);
+          }
+        }
+      }
+    }
+    return null;
+  }
   private initializeScoringLocations(): ScoringLocation[] {
     // Integer coordinates for scoring zones
     return [
@@ -237,45 +301,7 @@ export class Field {
     ];
   }
 
-  findNearestOpenNode(x: number, y: number): { x: number; y: number } | null {
-    const startC = Math.max(0, Math.min(this.width - 1, Math.floor(x)));
-    const startR = Math.max(0, Math.min(this.height - 1, Math.floor(y)));
-    const queue: { r: number; c: number }[] = [{ r: startR, c: startC }];
-    const visited = new Set<string>();
-    visited.add(`${startR},${startC}`);
 
-    while (queue.length > 0) {
-      const { r, c } = queue.shift()!;
-
-      if (this.isValidTile(r, c)) {
-        const isScoringLocation = this.getScoringLocationAt(c, r);
-
-        if (this.grid[r][c] === FieldTile.EMPTY && !isScoringLocation) {
-          return { x: c + 0.5, y: r + 0.5 };
-        }
-
-        const neighbors = [
-          { r: r + 1, c: c },
-          { r: r - 1, c: c },
-          { r: r, c: c + 1 },
-          { r: r, c: c - 1 },
-          { r: r + 1, c: c + 1 },
-          { r: r - 1, c: c - 1 },
-          { r: r + 1, c: c - 1 },
-          { r: r - 1, c: c + 1 },
-        ];
-
-        for (const n of neighbors) {
-          const key = `${n.r},${n.c}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push(n);
-          }
-        }
-      }
-    }
-    return null;
-  }
 }
 
 export class StartingField extends Field {

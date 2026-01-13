@@ -347,6 +347,9 @@ export class Engine {
     this.time += SECONDS_PER_TICK;
     this.modeTimer++;
 
+    // Optimize collision checks
+    this.field.updateRobotMap();
+
     // Switch modes
     if (this.modeTimer >= SCORING_INTERVAL) {
       this.modeTimer = 0;

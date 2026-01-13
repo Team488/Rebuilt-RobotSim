@@ -4,7 +4,6 @@ import { Field } from "../Field";
 import { FieldTile } from "../GameConst";
 import {
     findBestEVBall,
-    getPathTarget,
     isInTeamZone,
 } from "../StrategyUtils";
 
@@ -29,7 +28,7 @@ export class RapidCycleStrategy extends ActiveScoringStrategy {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist > 2) {
-                return getPathTarget(field, robot, { x: targetX, y: targetY });
+                return { x: targetX, y: targetY };
             }
         } else {
             this.status = "Snatching ball";
@@ -42,7 +41,7 @@ export class RapidCycleStrategy extends ActiveScoringStrategy {
                 { x: goal.tileX + 0.5, y: goal.tileY + 0.5 },
                 1.5
             );
-            if (ball) return getPathTarget(field, robot, ball);
+            if (ball) return ball;
         }
 
         return null;

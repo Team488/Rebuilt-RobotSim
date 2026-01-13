@@ -5,7 +5,6 @@ import { FieldTile, FIELD_WIDTH } from "../GameConst";
 import {
     findBestEVBall,
     findNearestEmptyTile,
-    getPathTarget,
 } from "../StrategyUtils";
 
 export class BullyCollectorStrategy extends InactiveScoringStrategy {
@@ -35,11 +34,8 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
                 { x: goal.tileX, y: goal.tileY },
             );
             if (nearestEmpty) {
-                const target = getPathTarget(field, robot, nearestEmpty);
-                if (target) {
-                    this.patience = 0;
-                    return target;
-                }
+                this.patience = 0;
+                return nearestEmpty;
             }
         }
 
@@ -68,12 +64,9 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
         );
 
         if (targetBall) {
-            const target = getPathTarget(field, robot, targetBall);
-            if (target) {
-                this.patience = 0;
-                this.status = "Aggressive scavenging";
-                return target;
-            }
+            this.patience = 0;
+            this.status = "Aggressive scavenging";
+            return targetBall;
         }
 
         // If no good balls, try to "shadow" or block the nearest opponent
@@ -81,11 +74,8 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
             this.status = `Bullying opponent`;
             const targetX = (robot.x + nearestOpponent.x) / 2;
             const targetY = (robot.y + nearestOpponent.y) / 2;
-            const target = getPathTarget(field, robot, { x: targetX, y: targetY });
-            if (target) {
-                this.patience = 0;
-                return target;
-            }
+            this.patience = 0;
+            return { x: targetX, y: targetY };
         }
 
         const { ball: anyBall } = findBestEVBall(
@@ -95,12 +85,9 @@ export class BullyCollectorStrategy extends InactiveScoringStrategy {
             1.0,
         );
         if (anyBall) {
-            const target = getPathTarget(field, robot, anyBall);
-            if (target) {
-                this.patience = 0;
-                this.status = "Collecting";
-                return target;
-            }
+            this.patience = 0;
+            this.status = "Collecting";
+            return anyBall;
         }
 
         // Unstick logic

@@ -14,7 +14,7 @@ import type { Team } from "./GameConst";
 // import { FieldTile } from './Field'; // Removed
 import type { Field } from "./Field";
 import type { Robot } from "./Robot";
-import { AStar } from "./AStar";
+
 
 export function getBallEV(
   x: number,
@@ -308,44 +308,7 @@ export function findNearestEmptyTile(
   return nearestEmpty;
 }
 
-export function getPathTarget(
-  field: Field,
-  robot: Robot,
-  target: { x: number; y: number },
-): { x: number; y: number } | null {
-  // 1. Try standard pathfinding (avoiding walls AND robots)
-  let path = AStar.findPath(field, { x: robot.x, y: robot.y }, target, robot.id);
 
-  // 2. Fallback: Try path avoiding ONLY walls if blocked by robots
-  if (!path) {
-    // We pass true for 'ignoreRobots' indirectly by not passing robot.id
-    // But wait, AStar.ts findPath has robotIdToIgnore.
-    // Let's check AStar.findPath signature: (field, start, target, robotIdToIgnore?)
-    // If we want to IGNORE ALL ROBOTS, we need to modify AStar or use a flag.
-    // Looking at AStar.ts: if (ignoreRobots) is passed to isPassable.
-    // Actually, AStar.findPath calls isPassable(..., false, robotIdToIgnore).
-    // Let's check AStar.ts again.
-
-    // I will try to find a path that ignores robots entirely to at least move in the right direction.
-    path = AStar.findPath(field, { x: robot.x, y: robot.y }, target, "IGNORE_ALL_ROBOTS");
-  }
-
-  if (!path) return null;
-  if (path.length < 2) return target;
-
-  // The first point in path is the center of the current tile or the start position.
-  // We want the NEXT point to move towards.
-  const currentTileX = Math.floor(robot.x);
-  const currentTileY = Math.floor(robot.y);
-  const path0TileX = Math.floor(path[0].x);
-  const path0TileY = Math.floor(path[0].y);
-
-  if (currentTileX === path0TileX && currentTileY === path0TileY) {
-    return path[1];
-  }
-
-  return path[0];
-}
 
 export function calculateHeading(
   from: { x: number; y: number },

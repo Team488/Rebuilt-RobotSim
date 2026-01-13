@@ -5,7 +5,6 @@ import { FieldTile } from "../GameConst";
 import {
     getBallEV,
     findBestEVBall,
-    getPathTarget,
     getScoringLocation,
 } from "../StrategyUtils";
 
@@ -41,7 +40,7 @@ export class BasicCollectorShootStrategy extends InactiveScoringStrategy {
                 targetEV,
             );
             if (bestBall && maxScore > 0) {
-                return getPathTarget(field, robot, bestBall);
+                return bestBall;
             } else if (robot.ballCount > 0) {
                 // If no more good balls and we have some, go deliver
                 this.isDelivering = true;
@@ -60,7 +59,7 @@ export class BasicCollectorShootStrategy extends InactiveScoringStrategy {
             }
 
             this.status = "Moving to shooting range";
-            return getPathTarget(field, robot, goalPos);
+            return goalPos;
         }
 
         this.status = "Idle";

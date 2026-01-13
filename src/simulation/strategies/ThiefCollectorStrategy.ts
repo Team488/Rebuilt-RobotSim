@@ -5,7 +5,6 @@ import { FieldTile, FIELD_WIDTH } from "../GameConst";
 import {
   findBestEVBall,
   findNearestEmptyTile,
-  getPathTarget,
   isInTeamZone,
 } from "../StrategyUtils";
 
@@ -36,11 +35,8 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
         { x: goal.tileX, y: goal.tileY },
       );
       if (nearestEmpty) {
-        const target = getPathTarget(field, robot, nearestEmpty);
-        if (target) {
-          this.patience = 0;
-          return target;
-        }
+        this.patience = 0;
+        return nearestEmpty;
       }
     }
 
@@ -60,12 +56,9 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
     );
 
     if (opponentBall) {
-      const target = getPathTarget(field, robot, opponentBall);
-      if (target) {
-        this.patience = 0;
-        this.status = "Infiltrating opponent territory";
-        return target;
-      }
+      this.patience = 0;
+      this.status = "Infiltrating opponent territory";
+      return opponentBall;
     }
 
     const { ball: anyBall } = findBestEVBall(
@@ -75,12 +68,9 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
       1.0,
     );
     if (anyBall) {
-      const target = getPathTarget(field, robot, anyBall);
-      if (target) {
-        this.patience = 0;
-        this.status = "Scavenging for any balls";
-        return target;
-      }
+      this.patience = 0;
+      this.status = "Scavenging for any balls";
+      return anyBall;
     }
 
     // Unstick/Lurk logic
@@ -89,10 +79,10 @@ export class ThiefCollectorStrategy extends InactiveScoringStrategy {
       this.status = "Lurking & repositioning";
       if (this.patience > 40) this.patience = 0;
       // Move towards a random spot in the midline
-      return getPathTarget(field, robot, {
+      return {
         x: FIELD_WIDTH / 2 + (Math.random() - 0.5) * 5,
         y: robot.y + (Math.random() - 0.5) * 5,
-      });
+      };
     }
 
     this.status = "Lurking";
