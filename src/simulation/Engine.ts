@@ -20,9 +20,14 @@ import { ALL_ACTIVE_STRATEGIES, ALL_INACTIVE_STRATEGIES } from "./strategies";
 const STORAGE_KEY = "robot_configs_v1";
 const TEAM_STORAGE_KEY = "saved_team_configs_v1";
 
+const isCustomName = (name: string | undefined): boolean => {
+  if (!name) return false;
+  return !/^(Red|Blue) [1-3]$/i.test(name);
+};
+
 interface RobotConfig {
   id: string;
-  name: string;
+  name?: string;
   scoringStrategy: string;
   collectionStrategy: string;
   moveSpeed: number;
@@ -137,7 +142,7 @@ export class Engine {
             robot.accuracyMin = config.accuracyMin;
           if (config.accuracyMax !== undefined)
             robot.accuracyMax = config.accuracyMax;
-          if (config.name) robot.name = config.name;
+          if (config.name && isCustomName(config.name)) robot.name = config.name;
         }
       }
 
@@ -147,18 +152,23 @@ export class Engine {
 
   saveConfigs() {
     try {
-      const configs: RobotConfig[] = this.robots.map((r) => ({
-        id: r.id,
-        name: r.name,
-        scoringStrategy: r.scoringStrategy.id,
-        collectionStrategy: r.collectionStrategy.id,
-        moveSpeed: r.moveSpeed,
-        maxBalls: r.maxBalls,
-        baseShotCooldown: r.baseShotCooldown,
-        maxShootDistance: r.maxShootDistance,
-        accuracyMin: r.accuracyMin,
-        accuracyMax: r.accuracyMax,
-      }));
+      const configs: RobotConfig[] = this.robots.map((r) => {
+        const config: RobotConfig = {
+          id: r.id,
+          scoringStrategy: r.scoringStrategy.id,
+          collectionStrategy: r.collectionStrategy.id,
+          moveSpeed: r.moveSpeed,
+          maxBalls: r.maxBalls,
+          baseShotCooldown: r.baseShotCooldown,
+          maxShootDistance: r.maxShootDistance,
+          accuracyMin: r.accuracyMin,
+          accuracyMax: r.accuracyMax,
+        };
+        if (isCustomName(r.name)) {
+          config.name = r.name;
+        }
+        return config;
+      });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
     } catch (e) {
       console.error("Failed to save configs", e);
@@ -176,9 +186,8 @@ export class Engine {
   }
 
   getRobotConfig(robot: Robot): RobotConfig {
-    return {
+    const config: RobotConfig = {
       id: robot.id,
-      name: robot.name,
       scoringStrategy: robot.scoringStrategy.id,
       collectionStrategy: robot.collectionStrategy.id,
       moveSpeed: robot.moveSpeed,
@@ -188,6 +197,12 @@ export class Engine {
       accuracyMin: robot.accuracyMin,
       accuracyMax: robot.accuracyMax,
     };
+
+    if (isCustomName(robot.name)) {
+      config.name = robot.name;
+    }
+
+    return config;
   }
 
   applyRobotConfig(robot: Robot, config: RobotConfig) {
@@ -211,7 +226,7 @@ export class Engine {
       robot.accuracyMin = config.accuracyMin;
     if (config.accuracyMax !== undefined)
       robot.accuracyMax = config.accuracyMax;
-    if (config.name) robot.name = config.name;
+    if (config.name && isCustomName(config.name)) robot.name = config.name;
   }
 
   getSavedTeams(): { name: string; robots: RobotConfig[] }[] {
