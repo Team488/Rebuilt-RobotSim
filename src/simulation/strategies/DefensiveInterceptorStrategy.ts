@@ -7,6 +7,7 @@ export class DefensiveInterceptorStrategy extends InactiveScoringStrategy {
     id = "defensive_interceptor";
     name = "Defensive Interceptor";
     actionTime = 0.5;
+    description = "Stays near the center line or home zone and tries to block opponent robots or balls from reaching the scoring area.";
 
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         // Find the opponent robot that is closest to our scoring zone and has balls

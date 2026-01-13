@@ -18,6 +18,7 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
   id = "basic_scoring";
   name = "Basic Scoring";
   actionTime = 1.0;
+  description = "Collects balls until full, then returns to the home zone to score. Shoots immediately if already in the zone.";
 
   private isScoring = false;
 
@@ -27,11 +28,15 @@ export class BasicScoringStrategy extends ActiveScoringStrategy {
 
     const goalPos = { x: scoreLoc.x + 0.5, y: scoreLoc.y + 0.5 };
 
-    // State machine: Score until empty, then collect until full
+    const inZone = isInTeamZone(robot.x, robot.team);
+
+    // State machine: Score until empty OR if in zone with balls. Collect until full.
     if (robot.ballCount >= robot.maxBalls) {
       this.isScoring = true;
     } else if (robot.ballCount === 0) {
       this.isScoring = false;
+    } else if (inZone && robot.ballCount > 0) {
+      this.isScoring = true;
     }
 
     // Mode 1: Collection
