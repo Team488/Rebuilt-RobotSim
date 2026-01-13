@@ -127,17 +127,19 @@ export class Robot {
     this.lastX = this.x;
     this.lastY = this.y;
 
-    if (this.cachedPath && this.cachedPath.length > 0) {
+    let remainingMove = this.moveSpeed;
+
+    while (remainingMove > 0.001 && this.cachedPath && this.cachedPath.length > 0) {
       const nextPoint = this.cachedPath[0];
       const dx = nextPoint.x - this.x;
       const dy = nextPoint.y - this.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist > 0.1) {
-        const step = this.moveSpeed;
-        const moveAttempt = Math.min(step, dist);
+      if (dist > 0.01) {
+        const moveAttempt = Math.min(remainingMove, dist);
         this.x += (dx / dist) * moveAttempt;
         this.y += (dy / dist) * moveAttempt;
+        remainingMove -= moveAttempt;
       } else {
         // Reached waypoint
         this.cachedPath.shift();

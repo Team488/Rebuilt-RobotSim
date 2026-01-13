@@ -11,7 +11,8 @@ import {
 export class LongRangeSniperStrategy extends ActiveScoringStrategy {
     id = "long_range_sniper";
     name = "Long-Range Sniper";
-    actionTime = 0.8;
+    actionTime = 1.0;
+    description = "Attempts to score from the edge of the zone to minimize travel distance. High risk, high reward.";
 
     decideMove(robot: Robot, field: Field): { x: number; y: number } | null {
         if (robot.ballCount === 0) {
