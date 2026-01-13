@@ -353,14 +353,14 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                     <button
                                         className={`secondary-button ${teamToSave === 'RED' ? 'selected' : ''}`}
                                         onClick={() => setTeamToSave('RED')}
-                                        style={{ flex: 1, borderColor: teamToSave === 'RED' ? '#ff4d4f' : '#eee' }}
+                                        style={{ flex: 1, borderColor: teamToSave === 'RED' ? '#ff4d4f' : 'var(--border-color)' }}
                                     >
                                         Red Team
                                     </button>
                                     <button
                                         className={`secondary-button ${teamToSave === 'BLUE' ? 'selected' : ''}`}
                                         onClick={() => setTeamToSave('BLUE')}
-                                        style={{ flex: 1, borderColor: teamToSave === 'BLUE' ? '#1890ff' : '#eee' }}
+                                        style={{ flex: 1, borderColor: teamToSave === 'BLUE' ? '#1890ff' : 'var(--border-color)' }}
                                     >
                                         Blue Team
                                     </button>
@@ -422,14 +422,14 @@ export const StrategyManager: React.FC<StrategyManagerProps> = ({
                                     <button
                                         className={`secondary-button ${loadAsTeam === 'RED' ? 'selected' : ''}`}
                                         onClick={() => setLoadAsTeam('RED')}
-                                        style={{ flex: 1, borderColor: loadAsTeam === 'RED' ? '#ff4d4f' : '#eee' }}
+                                        style={{ flex: 1, borderColor: loadAsTeam === 'RED' ? '#ff4d4f' : 'var(--border-color)' }}
                                     >
                                         Red Team
                                     </button>
                                     <button
                                         className={`secondary-button ${loadAsTeam === 'BLUE' ? 'selected' : ''}`}
                                         onClick={() => setLoadAsTeam('BLUE')}
-                                        style={{ flex: 1, borderColor: loadAsTeam === 'BLUE' ? '#1890ff' : '#eee' }}
+                                        style={{ flex: 1, borderColor: loadAsTeam === 'BLUE' ? '#1890ff' : 'var(--border-color)' }}
                                     >
                                         Blue Team
                                     </button>

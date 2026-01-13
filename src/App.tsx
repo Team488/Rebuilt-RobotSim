@@ -226,8 +226,9 @@ function App() {
             setRightOpen(false);
           }}
           style={{
-            backgroundColor: leftOpen ? "#333" : "#fff",
-            color: leftOpen ? "#fff" : "#333",
+            backgroundColor: leftOpen ? "var(--text-main)" : "var(--bg-card)",
+            color: leftOpen ? "var(--bg-main)" : "var(--text-main)",
+            border: "1px solid var(--border-color)",
           }}
         >
           Log {leftOpen ? "×" : "≡"}
@@ -238,8 +239,9 @@ function App() {
             setLeftOpen(false);
           }}
           style={{
-            backgroundColor: rightOpen ? "#333" : "#fff",
-            color: rightOpen ? "#fff" : "#333",
+            backgroundColor: rightOpen ? "var(--text-main)" : "var(--bg-card)",
+            color: rightOpen ? "var(--bg-main)" : "var(--text-main)",
+            border: "1px solid var(--border-color)",
           }}
         >
           Intell {rightOpen ? "×" : "≡"}
