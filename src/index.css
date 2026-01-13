@@ -412,6 +412,30 @@ h4 {
   min-width: 32px;
 }
 
+.play-again-toggle {
+  background-color: #fff;
+  color: #666;
+  border: 1px solid #eee;
+  font-size: 0.85rem;
+  padding: 0.6em 1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.play-again-toggle.active {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.play-again-toggle:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
 @media (max-width: 600px) {
   .score-display {
     gap: 10px;

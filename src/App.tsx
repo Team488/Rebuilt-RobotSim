@@ -13,6 +13,13 @@ function App() {
   const [, setTick] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
+  const [playAgain, setPlayAgain] = useState(false);
+  const playAgainRef = useRef(playAgain);
+
+  // Keep ref in sync
+  useEffect(() => {
+    playAgainRef.current = playAgain;
+  }, [playAgain]);
 
   const [leftOpen, setLeftOpen] = useState(window.innerWidth > 1024);
   const [rightOpen, setRightOpen] = useState(window.innerWidth > 1024);
@@ -53,6 +60,14 @@ function App() {
     engineRef.current.onGameEnd = (result) => {
       setGameResults((prev) => [...prev, result]);
       setIsRunning(false);
+
+      if (playAgainRef.current) {
+        // Automatically restart after a short delay
+        setTimeout(() => {
+          handleReset();
+          handleStart();
+        }, 1000);
+      }
     };
 
     return () => {
@@ -147,6 +162,8 @@ function App() {
             onStop={handleStop}
             onReset={handleReset}
             onUpdate={forceUpdate}
+            playAgain={playAgain}
+            setPlayAgain={setPlayAgain}
           />
 
           <div className="strategy-manager-container">

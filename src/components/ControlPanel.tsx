@@ -1,5 +1,6 @@
 import React from "react";
 import { Engine } from "../simulation/Engine";
+import { GAME_DURATION } from "../simulation/GameConst";
 
 interface ControlPanelProps {
   engine: Engine;
@@ -8,6 +9,8 @@ interface ControlPanelProps {
   onStop: () => void;
   onReset: () => void;
   onUpdate: () => void;
+  playAgain: boolean;
+  setPlayAgain: (val: boolean) => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -17,8 +20,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onStop,
   onReset,
   onUpdate,
+  playAgain,
+  setPlayAgain,
 }) => {
-  const isFinished = engine.time >= 220; // GAME_DURATION
+  const isFinished = engine.time >= GAME_DURATION;
 
   const handleMuchSlower = () => {
     engine.playbackSpeed = Math.max(0.1, engine.playbackSpeed - 1.0);
@@ -79,6 +84,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               Reset
             </button>
           )}
+
+          <div className="divider"></div>
+
+          <button
+            className={`play-again-toggle ${playAgain ? "active" : ""}`}
+            onClick={() => setPlayAgain(!playAgain)}
+            title="Automatically restart when the game ends"
+          >
+            {playAgain ? "🔄 Play Again: ON" : "🔄 Play Again: OFF"}
+          </button>
         </div>
 
         <div className="divider"></div>
