@@ -16,8 +16,8 @@ export const ZONE_RATIO_LEFT = 1 / 3;
 export const ZONE_RATIO_RIGHT = 2 / 3;
 export const BOUNDARY_WALL_HEIGHT_PERCENT = 0.7;
 
-export const SCORING_INTERVAL = 20 * BASE_TICK_RATE; // Seconds
-export const BALL_SPEED = 1 / 20 * BASE_TICK_RATE; // Units per tick (15 m/s at 20Hz)
+export const SCORING_INTERVAL = 20 * BASE_TICK_RATE;
+export const BALL_SPEED = 5 * BASE_TICK_RATE;
 export const ROBOTS_PER_TEAM = 3;
 
 export const FieldTile = {
