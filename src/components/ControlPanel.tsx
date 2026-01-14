@@ -56,9 +56,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="score-item blue-score">Blue: {engine.scoreBlue}</div>
         <div className="score-item time">Time: {engine.time.toFixed(1)}s</div>
         <div
-          className={`score-item mode-status ${engine.currentScoringTeam === "RED" ? "red" : "blue"}`}
+          className={`score-item mode-status ${engine.getActiveTeams().length > 1
+              ? "both"
+              : engine.getActiveTeams()[0] === "RED"
+                ? "red"
+                : "blue"
+            }`}
         >
-          {engine.currentScoringTeam === "RED" ? "🔴 RED" : "🔵 BLUE"} SCORING
+          {engine.getPhaseName()}:{" "}
+          {engine.getActiveTeams().length > 1
+            ? "BOTH ACTIVE"
+            : `${engine.getActiveTeams()[0]} ACTIVE`}
         </div>
       </div>
 

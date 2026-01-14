@@ -97,14 +97,69 @@ export const FieldView: React.FC<FieldViewProps> = ({ engine }) => {
       engine.field.scoringLocations.forEach((sl) => {
         const x = sl.tileX * SCALE;
         const y = sl.tileY * SCALE;
-        ctx.fillStyle =
-          sl.team === "RED" ? "rgba(255, 0, 0, 0.3)" : "rgba(0, 0, 255, 0.3)";
-        ctx.fillRect(x, y, SCALE, SCALE);
-        // Border
-        ctx.strokeStyle = sl.team === "RED" ? "red" : "blue";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, SCALE, SCALE);
-        ctx.strokeRect(x, y, SCALE, SCALE);
+        const centerX = x + SCALE / 2;
+        const centerY = y + SCALE / 2;
+        const pulse = Math.sin(engine.time * 5) * 0.2 + 1; // Pulse over time
+
+        if (sl.active) {
+          // Glow effect for active hubs
+          const gradient = ctx.createRadialGradient(
+            centerX,
+            centerY,
+            2,
+            centerX,
+            centerY,
+            SCALE,
+          );
+          if (sl.team === "RED") {
+            gradient.addColorStop(0, "rgba(255, 50, 50, 0.8)");
+            gradient.addColorStop(0.5, "rgba(255, 0, 0, 0.4)");
+            gradient.addColorStop(1, "rgba(255, 0, 0, 0)");
+          } else {
+            gradient.addColorStop(0, "rgba(50, 150, 255, 0.8)");
+            gradient.addColorStop(0.5, "rgba(0, 100, 255, 0.4)");
+            gradient.addColorStop(1, "rgba(0, 100, 255, 0)");
+          }
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, SCALE * 1.2 * pulse, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Core
+          ctx.fillStyle = sl.team === "RED" ? "#ff4d4f" : "#1890ff";
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, SCALE * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Pulsing Ring
+          ctx.strokeStyle = sl.team === "RED" ? "#ff4d4f" : "#1890ff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, SCALE * 0.6 * pulse, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          // Inactive Hub - Dim and Desaturated
+          ctx.fillStyle = "rgba(150, 150, 150, 0.2)";
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, SCALE * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "rgba(100, 100, 100, 0.4)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, SCALE * 0.5, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Small "X" or lock icon feel?
+          ctx.beginPath();
+          const r = SCALE * 0.2;
+          ctx.moveTo(centerX - r, centerY - r);
+          ctx.lineTo(centerX + r, centerY + r);
+          ctx.moveTo(centerX + r, centerY - r);
+          ctx.lineTo(centerX - r, centerY + r);
+          ctx.stroke();
+        }
       });
 
       // Draw Flying Balls

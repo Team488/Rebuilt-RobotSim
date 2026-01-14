@@ -189,8 +189,18 @@ function App() {
           <div
             className="field-container"
             style={{
-              boxShadow: `0 10px 40px ${engineRef.current.currentScoringTeam === "RED" ? "rgba(255, 77, 79, 0.2)" : "rgba(24, 144, 255, 0.2)"}`,
-              border: `4px solid ${engineRef.current.currentScoringTeam === "RED" ? "#ff4d4f" : "#1890ff"}`,
+              boxShadow: `0 10px 40px ${engineRef.current.getActiveTeams().length > 1
+                  ? "rgba(150, 150, 150, 0.2)"
+                  : engineRef.current.getActiveTeams()[0] === "RED"
+                    ? "rgba(255, 77, 79, 0.2)"
+                    : "rgba(24, 144, 255, 0.2)"
+                }`,
+              border: `4px solid ${engineRef.current.getActiveTeams().length > 1
+                  ? "#888"
+                  : engineRef.current.getActiveTeams()[0] === "RED"
+                    ? "#ff4d4f"
+                    : "#1890ff"
+                }`,
               position: "relative",
             }}
           >

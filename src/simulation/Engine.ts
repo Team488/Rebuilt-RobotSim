@@ -8,10 +8,13 @@ import {
   GAME_DURATION,
   TEAM_RED,
   TEAM_BLUE,
-  SCORING_INTERVAL,
   ROBOTS_PER_TEAM,
   BALL_SPEED,
   FieldTile,
+  AUTON_DURATION,
+  TRANSITION_DURATION,
+  SHIFT_DURATION,
+  NUM_SHIFTS,
 } from "./GameConst";
 import type { Team } from "./GameConst";
 import { isInTeamZone, roughGaussian } from "./StrategyUtils";
@@ -57,8 +60,9 @@ export class Engine {
 
   scoreRed: number = 0;
   scoreBlue: number = 0;
+  autonScoreRed: number = 0;
+  autonScoreBlue: number = 0;
 
-  currentScoringTeam: Team = TEAM_BLUE; // Default start
   modeTimer: number = 0;
 
   redTeamName: string = "Default Red";
@@ -79,14 +83,15 @@ export class Engine {
     this.time = 0;
     this.scoreRed = 0;
     this.scoreBlue = 0;
-    this.currentScoringTeam = TEAM_BLUE;
+    this.autonScoreRed = 0;
+    this.autonScoreBlue = 0;
     this.modeTimer = 0;
 
     // Initialize Teams
     this.initializeTeam(TEAM_RED, preserveConfigs ? oldRobots : undefined);
     this.initializeTeam(TEAM_BLUE, preserveConfigs ? oldRobots : undefined);
 
-    this.updateRobotModes();
+    this.updateRobotModes([TEAM_RED, TEAM_BLUE]);
   }
 
   initializeTeam(team: Team, oldRobots?: Robot[]) {
@@ -432,18 +437,40 @@ export class Engine {
     }
 
     this.time += SECONDS_PER_TICK;
-    this.modeTimer++;
+
+    // Determine active teams based on timeline
+    let activeTeams: Team[] = [TEAM_RED, TEAM_BLUE];
+    const totalShiftDuration = NUM_SHIFTS * SHIFT_DURATION;
+    const shiftStartTime = AUTON_DURATION + TRANSITION_DURATION;
+    const endGameStartTime = shiftStartTime + totalShiftDuration;
+
+    if (this.time < shiftStartTime) {
+      // Auton and Transition: Both Active
+      activeTeams = [TEAM_RED, TEAM_BLUE];
+    } else if (this.time < endGameStartTime) {
+      // Shifts: One Active / One Inactive
+      const shiftTime = this.time - shiftStartTime;
+      const shiftIndex = Math.floor(shiftTime / SHIFT_DURATION);
+
+      const teamWithLeastAuton =
+        this.autonScoreRed < this.autonScoreBlue
+          ? TEAM_RED
+          : this.autonScoreBlue < this.autonScoreRed
+            ? TEAM_BLUE
+            : TEAM_RED;
+      const otherTeam = teamWithLeastAuton === TEAM_RED ? TEAM_BLUE : TEAM_RED;
+
+      const activeTeam = shiftIndex % 2 === 0 ? teamWithLeastAuton : otherTeam;
+      activeTeams = [activeTeam];
+    } else {
+      // End Game: Both Active
+      activeTeams = [TEAM_RED, TEAM_BLUE];
+    }
+
+    this.updateRobotModes(activeTeams);
 
     // Optimize collision checks
     this.field.updateRobotMap();
-
-    // Switch modes
-    if (this.modeTimer >= SCORING_INTERVAL) {
-      this.modeTimer = 0;
-      this.currentScoringTeam =
-        this.currentScoringTeam === TEAM_RED ? TEAM_BLUE : TEAM_RED;
-      this.updateRobotModes();
-    }
 
     // Update Flying Balls
     for (let i = this.field.flyingBalls.length - 1; i >= 0; i--) {
@@ -477,8 +504,14 @@ export class Engine {
             // SCORING LOGIC
             if (scoringLoc.team === TEAM_RED) {
               this.scoreRed++;
+              if (this.time <= AUTON_DURATION + TRANSITION_DURATION) {
+                this.autonScoreRed++;
+              }
             } else {
               this.scoreBlue++;
+              if (this.time <= AUTON_DURATION + TRANSITION_DURATION) {
+                this.autonScoreBlue++;
+              }
             }
 
             // Ball is consumed/scored. Do not place on grid.
@@ -588,14 +621,51 @@ export class Engine {
     });
   }
 
-  updateRobotModes() {
+  getPhaseName(): string {
+    const shiftStartTime = AUTON_DURATION + TRANSITION_DURATION;
+    const totalShiftDuration = NUM_SHIFTS * SHIFT_DURATION;
+    const endGameStartTime = shiftStartTime + totalShiftDuration;
+
+    if (this.time < AUTON_DURATION) return "AUTONOMOUS";
+    if (this.time < shiftStartTime) return "TRANSITION";
+    if (this.time < endGameStartTime) {
+      const shiftIndex = Math.floor(
+        (this.time - shiftStartTime) / SHIFT_DURATION,
+      );
+      return `SHIFT ${shiftIndex + 1}`;
+    }
+    return "END GAME";
+  }
+
+  getActiveTeams(): Team[] {
+    const shiftStartTime = AUTON_DURATION + TRANSITION_DURATION;
+    const totalShiftDuration = NUM_SHIFTS * SHIFT_DURATION;
+    const endGameStartTime = shiftStartTime + totalShiftDuration;
+
+    if (this.time < shiftStartTime) return [TEAM_RED, TEAM_BLUE];
+    if (this.time < endGameStartTime) {
+      const shiftTime = this.time - shiftStartTime;
+      const shiftIndex = Math.floor(shiftTime / SHIFT_DURATION);
+      const teamWithLeastAuton =
+        this.autonScoreRed < this.autonScoreBlue
+          ? TEAM_RED
+          : this.autonScoreBlue < this.autonScoreRed
+            ? TEAM_BLUE
+            : TEAM_RED;
+      const otherTeam = teamWithLeastAuton === TEAM_RED ? TEAM_BLUE : TEAM_RED;
+      return [shiftIndex % 2 === 0 ? teamWithLeastAuton : otherTeam];
+    }
+    return [TEAM_RED, TEAM_BLUE];
+  }
+
+  updateRobotModes(activeTeams: Team[]) {
     // Toggle scoring locations
     this.field.scoringLocations.forEach((loc) => {
-      loc.active = loc.team === this.currentScoringTeam;
+      loc.active = activeTeams.includes(loc.team);
     });
 
     this.robots.forEach((robot) => {
-      if (robot.team === this.currentScoringTeam) {
+      if (activeTeams.includes(robot.team)) {
         robot.setMode("SCORING");
       } else {
         robot.setMode("COLLECTING");
